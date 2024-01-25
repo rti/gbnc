@@ -1,6 +1,6 @@
 # Naïve Infrastructure for a GB&C project
 
-*Warning* This is a prototype for development only. No security considerations have been made. All services run as root!
+**Warning** This is a prototype for development only. No security considerations have been made. All services run as root!
 
 ## What's in the box
 
