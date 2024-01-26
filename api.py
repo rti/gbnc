@@ -26,6 +26,7 @@ else:
 document_store = InMemoryDocumentStore()
 document_store.write_documents(documents) 
 
+# TODO: discolm prompt https://huggingface.co/DiscoResearch/DiscoLM_German_7b_v1
 prompt_template = """
 Given these documents, answer the question. Answer in a full sentence. Give the response only, no explanation. Don't mention the documents.
 Documents:
@@ -38,6 +39,7 @@ Answer:
 
 retriever = InMemoryBM25Retriever(document_store=document_store)
 prompt_builder = PromptBuilder(template=prompt_template)
+print(f"Setting up ollama with {os.getenv('MODEL')}")
 llm = OllamaGenerator(model=os.getenv("MODEL"), url="http://localhost:11434/api/generate")
 rag_pipeline = Pipeline()
 rag_pipeline.add_component("retriever", retriever)
