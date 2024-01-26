@@ -1,6 +1,3 @@
-from haystack.components.builders.prompt_builder import PromptBuilder
-
-# TODO: discolm prompt https://huggingface.co/DiscoResearch/DiscoLM_German_7b_v1
 
 prompt_template = """
 Given these documents, answer the question. Answer in a full sentence. Give the response only, no explanation. Don't mention the documents.

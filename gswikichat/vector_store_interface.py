@@ -4,8 +4,7 @@ import json
 from haystack import Document
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 
-# FAISS: Facebook AI Similarity Search
-
+# TODO: FAISS: Facebook AI Similarity Search
 # from haystack.nodes import Seq2SeqGenerator
 # from haystack.utils import convert_files_to_dicts, fetch_archive_from_http, clean_wiki_text
 # from haystack.nodes import EmbeddingRetriever, DensePassageRetriever

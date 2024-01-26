@@ -16,6 +16,7 @@ retriever = InMemoryBM25Retriever(
 )
 prompt_builder = PromptBuilder(template=prompt_template)
 
+# TODO: discolm prompt https://huggingface.co/DiscoResearch/DiscoLM_German_7b_v1
 print(f"Setting up ollama with {os.getenv('MODEL')}")
 llm = OllamaGenerator(
     model=os.getenv("MODEL"),
