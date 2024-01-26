@@ -5,6 +5,7 @@ from haystack import Pipeline, Document
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack_integrations.components.generators.ollama import OllamaGenerator
+from haystack.components.builders.answer_builder import AnswerBuilder
 from haystack.components.builders.prompt_builder import PromptBuilder
 
 documents = []
@@ -41,12 +42,19 @@ retriever = InMemoryBM25Retriever(document_store=document_store)
 prompt_builder = PromptBuilder(template=prompt_template)
 print(f"Setting up ollama with {os.getenv('MODEL')}")
 llm = OllamaGenerator(model=os.getenv("MODEL"), url="http://localhost:11434/api/generate")
+answer_builder = AnswerBuilder()
+
 rag_pipeline = Pipeline()
 rag_pipeline.add_component("retriever", retriever)
 rag_pipeline.add_component("prompt_builder", prompt_builder)
 rag_pipeline.add_component("llm", llm)
+rag_pipeline.add_component("answer_builder", answer_builder)
+
 rag_pipeline.connect("retriever", "prompt_builder.documents")
 rag_pipeline.connect("prompt_builder", "llm")
+rag_pipeline.connect("llm.replies", "answer_builder.replies")
+rag_pipeline.connect("llm.metadata", "answer_builder.meta")
+rag_pipeline.connect("retriever", "answer_builder.documents")
 
 # =============================================================================
 
@@ -67,6 +75,15 @@ async def api(q):
         {
             "retriever": {"query": q },
             "prompt_builder": {"question": q },
+            "answer_builder": {"query": q },
         }
     )
-    return results["llm"]["replies"]
+    answer = results["answer_builder"]["answers"][0]
+    return {
+            "answer": answer.data,
+            "sources": [{
+                "src": d.meta["src"],
+                "content": d.content,
+                "score": d.score
+                } for d in answer.documents]
+            }

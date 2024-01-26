@@ -15,7 +15,9 @@
           .then((response) => response.json())
           .then((data) => {
             const resultsDiv = document.querySelector("#results");
-            resultsDiv.innerHTML = data;
+            resultsDiv.innerHTML = data.answer;
+            const sourcesDiv = document.querySelector("#sources");
+            sourcesDiv.innerHTML = JSON.stringify(data.sources);
             button.disabled = false;
           });
       }
@@ -44,6 +46,7 @@
           onclick="search()"
         />
         <div class="results" id="results"></div>
+        <div class="sources" id="sources"></div>
       </div>
     </div>
   </body>
