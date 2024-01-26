@@ -42,7 +42,7 @@ RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama
 
 # Setup the custom API and frontend
 WORKDIR /workspace
-COPY --chmod=644 api.py api.py
+COPY --chmod=644 ./gswikichat ./gswikichat
 COPY --chmod=755 static static
 COPY --chmod=755 excellent-articles excellent-articles
 
