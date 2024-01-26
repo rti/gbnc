@@ -33,12 +33,13 @@ RUN pip install "uvicorn[standard]"
 RUN pip install haystack-ai
 RUN pip install ollama-haystack
 
-# Container start script
-COPY --chmod=755 start.sh /start.sh
 
 # Setup the custom API and frontend
 WORKDIR /workspace
-COPY --chmod=644 api.py /workspace/
-COPY --chmod=755 static /workspace/static
+COPY --chmod=644 api.py api.py
+COPY --chmod=755 static static
+COPY --chmod=755 excellent-articles excellent-articles
 
+# Container start script
+COPY --chmod=755 start.sh /start.sh
 CMD [ "/start.sh" ]

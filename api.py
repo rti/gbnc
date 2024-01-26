@@ -1,4 +1,5 @@
 import os
+import json
 
 from haystack import Pipeline, Document
 from haystack.document_stores.in_memory import InMemoryDocumentStore
@@ -6,15 +7,24 @@ from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack_integrations.components.generators.ollama import OllamaGenerator
 from haystack.components.builders.prompt_builder import PromptBuilder
 
+documents = []
+
+if os.path.isfile("./excellent-articles/excellent-articles.json"):
+    with open("./excellent-articles/excellent-articles.json", 'r') as f:
+        json_obj = json.load(f)
+        for k, v in json_obj.items():
+            print(f"Loading {k}")
+            documents.append(Document(content=v, meta={"src": k}))
+else:
+    documents = [
+            Document(content="My name is Asra, I live in Paris.", meta={"src": "doc_1"}),
+            Document(content="My name is Lee, I live in Berlin.", meta={"src": "doc2"}),
+            Document(content="My name is Giorgio, I live in Rome.", meta={"src": "doc_3"}),
+        ]
+
 # Write documents to InMemoryDocumentStore
 document_store = InMemoryDocumentStore()
-document_store.write_documents(
-    [
-        Document(content="My name is Asra, I live in Paris."),
-        Document(content="My name is Lee, I live in Berlin."),
-        Document(content="My name is Giorgio, I live in Rome."),
-    ]
-)
+document_store.write_documents(documents) 
 
 prompt_template = """
 Given these documents, answer the question. Answer in a full sentence. Give the response only, no explanation. Don't mention the documents.
