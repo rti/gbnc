@@ -6,21 +6,9 @@ ARG DOCKER_FROM=nvidia/cuda:$CUDA_VERSION-cudnn$CUDNN_VERSION-devel-ubuntu$UBUNT
 # Base NVidia CUDA Ubuntu image
 FROM $DOCKER_FROM AS base
 
-# compile python from source - avoid unsupported library problems
-RUN apt update -y && apt upgrade -y && \
-    apt-get install -y wget build-essential checkinstall  \
-    libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev \
-    libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev && \
-    cd /usr/src && \
-    wget https://www.python.org/ftp/python/3.8.10/Python-3.8.10.tgz && \
-    tar xzf Python-3.8.10.tgz && \
-    cd Python-3.8.10 && \
-    ./configure --enable-optimizations && \
-    make altinstall
-
 # Install Python plus openssh, which is our minimum set of required packages.
 RUN apt-get update -y && \
-    apt-get install -y python3 python3-pip python3-venv && \
+    apt-get install -y python3.9 python3-pip python3-venv && \
     apt-get install -y --no-install-recommends openssh-server openssh-client \
     git git-lfs && \
     python3 -m pip install --upgrade pip && \
