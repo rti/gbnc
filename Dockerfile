@@ -8,9 +8,8 @@ FROM $DOCKER_FROM AS base
 
 # Install Python plus openssh, which is our minimum set of required packages.
 RUN apt-get update -y && \
-    apt-get install -y python3.9 python3-pip python3-venv && \
-    apt-get install -y --no-install-recommends openssh-server openssh-client \
-    git git-lfs && \
+    apt-get install -y python3 python3-pip python3-venv && \
+    apt-get install -y --no-install-recommends openssh-server openssh-client git git-lfs && \
     python3 -m pip install --upgrade pip && \
     apt-get install -y curl && \
     apt-get clean && \
@@ -26,8 +25,8 @@ RUN pip install fastapi
 RUN pip install "uvicorn[standard]"
 
 # RAG framework haystack
-# RUN pip install --upgrade pip
-# RUN pip install haystack-ai
+RUN pip install --upgrade pip
+RUN pip install haystack-ai
 RUN pip install ollama-haystack
 RUN pip install farm-haystack[faiss,preprocessing,elasticsearch,inference]
 
