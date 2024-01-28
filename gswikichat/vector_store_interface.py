@@ -99,7 +99,7 @@ def config_reader(
 """ # End Section
 
 # if __name__ == '__main__':
-json_fname = "./excellent-articles/excellent-articles_10.json"
+json_fname = "./excellent-articles/excellent-articles_10_paragraphs.json"
 # json_fname = "dummy.json"
 squrl = "sqlite:///wikitext.sqlite.db"
 index = "document"
