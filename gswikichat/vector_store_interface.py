@@ -4,6 +4,10 @@
 pip install --upgrade pip
 pip install farm-haystack[colab,faiss,inference]
 pip install farm-haystack
+
+# Below DocumentStore follows the Haystack example:
+"Tutorial: Better Retrieval with Embedding Retrieval"
+https://haystack.deepset.ai/tutorials/06_better_retrieval_via_embedding_retrieval
 """
 
 import os
