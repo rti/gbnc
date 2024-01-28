@@ -1,34 +1,49 @@
+"""!pip install farm-haystack[sql]"""
+
 import os
 import json
 
 from haystack import Document
-from haystack.document_stores.in_memory import InMemoryDocumentStore
+from haystack.nodes import EmbeddingRetriever
+from haystack.document_stores import InMemoryDocumentStore, SQLDocumentStore
+from haystack.schema import Document
 
-# TODO: FAISS: Facebook AI Similarity Search
-# from haystack.nodes import Seq2SeqGenerator
-# from haystack.utils import convert_files_to_dicts, fetch_archive_from_http, clean_wiki_text
-# from haystack.nodes import EmbeddingRetriever, DensePassageRetriever
-# from haystack.document_stores.faiss import FAISSDocumentStore
+def create_document_store(squrl: str="sqlite:///wikitext.sqlite.db"):
+    if squrl is None:
+        # Write documents to InMemoryDocumentStore
+        return InMemoryDocumentStore()
 
-# document_store = FAISSDocumentStore(
-#     faiss_index_factory_str="Flat", vector_dim=128)
+    return SQLDocumentStore(url=squrl, index="document")
 
-# retriever = EmbeddingRetriever(document_store=document_store,
-#                                embedding_model="yjernite/retribert-base-uncased", model_format="retribert")
 
-# document_store.delete_documents()
-# # document_store.save("my_faiss_index.faiss")
-# new_document_store = FAISSDocumentStore.load("my_faiss_index.faiss")
+def ingest_json_to_document_store(json_fname: str):
+
+    # Load JSON data
+    with open(json_fname, "r") as file:
+        data = json.load(file)
+        documents = [
+            Document(content=doc["content"], meta=doc.get("meta"))
+            for doc in data
+        ]
+
+    # Write documents to the DocumentStore
+    document_store.write_documents(documents)
+
+    # Add embeddings to the documents in the DocumentStore
+    document_store.update_embeddings(retriever)
+    return document_store
+
 
 
 documents = []
 
-if os.path.isfile("./excellent-articles/excellent-articles.json"):
-    with open("./excellent-articles/excellent-articles.json", 'r') as f:
-        json_obj = json.load(f)
-        for k, v in json_obj.items():
-            print(f"Loading {k}")
-            documents.append(Document(content=v, meta={"src": k}))
+# json_fname = "./excellent-articles/excellent-articles.json"
+json_fname = "dummy.json"
+
+if os.path.isfile(json_fname):
+    document_store = ingest_json_to_document_store(
+        json_fname=json_fname
+    )
 else:
     documents = [
         Document(
@@ -45,6 +60,5 @@ else:
         ),
     ]
 
-# Write documents to InMemoryDocumentStore
-document_store = InMemoryDocumentStore()
+
 document_store.write_documents(documents)

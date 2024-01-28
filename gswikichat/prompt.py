@@ -1,3 +1,4 @@
+from haystack.components.builders.prompt_builder import PromptBuilder
 
 prompt_template = """
 Given these documents, answer the question. Answer in a full sentence. Give the response only, no explanation. Don't mention the documents.
@@ -15,3 +16,5 @@ Documents:
 # Then only return {{ doc.meta["src"] }} and nothing at all.
 # {% endfor %}
 # """
+
+prompt_builder = PromptBuilder(template=prompt_template)
