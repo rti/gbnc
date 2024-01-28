@@ -28,7 +28,7 @@ RUN pip install "uvicorn[standard]"
 RUN pip install --upgrade pip
 RUN pip install haystack-ai
 RUN pip install ollama-haystack
-RUN pip install farm-haystack[colab,faiss,inference]
+RUN pip install farm-haystack[faiss,preprocessing,elasticsearch,inference]
 
 # Pull a language model
 ARG MODEL=phi
