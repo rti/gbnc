@@ -25,8 +25,8 @@ RUN pip install fastapi
 RUN pip install "uvicorn[standard]"
 
 # RAG framework haystack
-RUN pip install --upgrade pip
-RUN pip install haystack-ai
+# RUN pip install --upgrade pip
+# RUN pip install haystack-ai
 RUN pip install ollama-haystack
 RUN pip install farm-haystack[faiss,preprocessing,elasticsearch,inference]
 
