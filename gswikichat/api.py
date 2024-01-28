@@ -14,10 +14,10 @@ async def root():
 
 
 @app.get("/api")
-async def api(q):
+async def api(q, topk=10):
     results = rag_pipeline.run(
         {
-            "retriever": {"query": q},
+            "retriever": {"query": q, "top_k": topk},
             "prompt_builder": {"question": q},
             "answer_builder": {"query": q},
         }
