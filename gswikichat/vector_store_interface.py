@@ -3,6 +3,7 @@ import json
 
 from haystack import Document
 from haystack.document_stores.in_memory import InMemoryDocumentStore
+from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 
 # TODO: FAISS: Facebook AI Similarity Search
 # from haystack.nodes import Seq2SeqGenerator
@@ -20,7 +21,7 @@ from haystack.document_stores.in_memory import InMemoryDocumentStore
 # # document_store.save("my_faiss_index.faiss")
 # new_document_store = FAISSDocumentStore.load("my_faiss_index.faiss")
 
-
+top_k = 5
 documents = []
 
 if os.path.isfile("./excellent-articles/excellent-articles.json"):
@@ -48,3 +49,8 @@ else:
 # Write documents to InMemoryDocumentStore
 document_store = InMemoryDocumentStore()
 document_store.write_documents(documents)
+
+retriever = InMemoryBM25Retriever(
+    document_store=document_store,
+    top_k=top_k
+)
