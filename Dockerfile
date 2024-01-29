@@ -42,9 +42,9 @@ RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama
 
 # Setup the custom API and frontend
 WORKDIR /workspace
-COPY --chmod=644 ./gswikichat ./gswikichat
-COPY --chmod=755 frontend/dist /workspace/frontend/dist
-COPY --chmod=755 excellent-articles excellent-articles
+COPY --chmod=644 gswikichat gswikichat
+COPY --chmod=755 frontend/dist frontend/dist
+COPY --chmod=755 json_input json_input
 
 # Container start script
 COPY --chmod=755 start.sh /start.sh
