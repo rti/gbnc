@@ -14,6 +14,7 @@ import os
 import json
 
 from haystack import Document
+
 # from haystack.document_stores.in_memory import InMemoryDocumentStore
 # from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack.document_stores import FAISSDocumentStore
@@ -76,7 +77,6 @@ def default_text_to_documents():
             meta={"src": "doc_3"}
         ),
     ]
-
 
 def ingest_documents(documents, document_store, retriever):
     # Write documents to the DocumentStore
