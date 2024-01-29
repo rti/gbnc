@@ -24,8 +24,8 @@ from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 top_k = 5
 documents = []
 
-if os.path.isfile("./excellent-articles/excellent-articles.json"):
-    with open("./excellent-articles/excellent-articles.json", 'r') as f:
+if os.path.isfile("./json_input/excellent-articles.json"):
+    with open("./json_input/excellent-articles.json", 'r') as f:
         json_obj = json.load(f)
         for k, v in json_obj.items():
             print(f"Loading {k}")
