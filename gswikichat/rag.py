@@ -1,11 +1,12 @@
 import os
 
-from haystack import Pipeline
-
+# from haystack import Pipeline
+# from haystack.pipelines import Pipeline
 # from haystack_integrations.components.generators.ollama import OllamaGenerator
 from haystack.components.builders.answer_builder import AnswerBuilder
 from haystack.components.builders.prompt_builder import PromptBuilder
-from haystack.pipelines import DocumentSearchPipeline
+from haystack import Pipeline
+
 
 from .prompt import prompt_builder
 from .llm_config import llm
@@ -30,8 +31,8 @@ from .vector_store_interface import retriever
 
 answer_builder = AnswerBuilder()
 
-# rag_pipeline = Pipeline()
-rag_pipeline = DocumentSearchPipeline(retriever)
+rag_pipeline = Pipeline()
+# rag_pipeline = DocumentSearchPipeline(retriever)
 rag_pipeline.add_component("retriever", retriever)
 rag_pipeline.add_component("prompt_builder", prompt_builder)
 rag_pipeline.add_component("llm", llm)

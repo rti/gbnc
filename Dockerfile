@@ -16,19 +16,23 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/usr/local/cuda/bin:${PATH}"
+ENV HAYSTACK_TELEMETRY_ENABLED="False"
+ENV TRUST_REMOTE_CODE="True"
 
 # Install ollama llm inference engine
 RUN curl https://ollama.ai/install.sh | sh
 
 # Install fastapi and web server
+RUN pip install --upgrade pip
 RUN pip install fastapi
 RUN pip install "uvicorn[standard]"
 
 # RAG framework haystack
-RUN pip install --upgrade pip
-RUN pip install haystack-ai
 RUN pip install ollama-haystack
 RUN pip install farm-haystack[faiss,preprocessing,elasticsearch,inference]
+# RUN pip install haystack-ai
+# RUN pip install farm-haystack[all]
+# RUN pip uninstall -y haystack-ai
 
 # Pull a language model
 ARG MODEL=phi
@@ -46,7 +50,7 @@ RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama
 WORKDIR /workspace
 COPY --chmod=644 ./gswikichat ./gswikichat
 COPY --chmod=755 static static
-COPY --chmod=755 excellent-articles excellent-articles
+COPY --chmod=755 json_input json_input
 
 # Container start script
 COPY --chmod=755 start.sh /start.sh
