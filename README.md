@@ -2,6 +2,21 @@
 
 **Warning** This is a prototype for development only. No security considerations have been made. All services run as root!
 
+## Getting started
+
+### Locally
+
+To build and run the container locally with hot reload on `api.py` do:
+```
+DOCKER_BUILDKIT=1 docker build . -t gbnc
+docker run -v "$(pwd)/":/workspace/ -p 8000:8000 --rm --name gbnc -it gbnc
+```
+Point your browser to http://localhost:8000/ and use the frontend.
+
+### Runpod.io
+
+The container works on [runpod.io](https://www.runpod.io/) GPU instances. A [template is available here](https://runpod.io/gsc?template=0w8z55rf19&ref=yfvyfa0s).
+
 ## What's in the box
 
 ### Docker container
@@ -27,18 +42,3 @@ A [FastAPI](https://fastapi.tiangolo.com/) server is running in the container. I
 ### Frontend
 
 A minimal frontend lets the user input a question and renders the response from the system.
-
-## How to run
-
-### Locally
-
-To build and run the container locally do:
-```
-DOCKER_BUILDKIT=1 docker build . -t gbnc
-docker run -p 8000:8000 --rm -it gbnc
-```
-Then you can point your browser to http://localhost:8000/ and use the frontend.
-
-### Runpod.io
-
-The container was tested on a [runpod.io](https://www.runpod.io/) GPU instance. A [template is available here](https://runpod.io/gsc?template=0w8z55rf19&ref=yfvyfa0s).

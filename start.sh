@@ -19,7 +19,7 @@ ollama serve &
 cd /workspace
 
 echo "Starting api"
-uvicorn gswikichat:app --host 0.0.0.0 --port 8000 &
+uvicorn gswikichat:app --reload --host 0.0.0.0 --port 8000 &
 
 echo "Sleeping..."
 sleep infinity
