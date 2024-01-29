@@ -4,13 +4,14 @@ from fastapi import FastAPI
 
 from .rag import rag_pipeline
 
+
 app = FastAPI()
-app.mount("/app", StaticFiles(directory="static"), name="static")
+app.mount("/frontend/dist", StaticFiles(directory="frontend/dist", html=True), name="frontend")
 
 
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/app/index.html", status_code=302)
+    return RedirectResponse(url="/frontend/dist", status_code=302)
 
 
 @app.get("/api")
