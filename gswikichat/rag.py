@@ -1,27 +1,10 @@
-import os
 
 from haystack import Pipeline
-from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
-from haystack_integrations.components.generators.ollama import OllamaGenerator
 from haystack.components.builders.answer_builder import AnswerBuilder
-from haystack.components.builders.prompt_builder import PromptBuilder
 
-from .prompt import prompt_template
-from .vector_store_interface import document_store
-
-
-retriever = InMemoryBM25Retriever(
-    document_store=document_store,
-    top_k=1
-)
-prompt_builder = PromptBuilder(template=prompt_template)
-
-# TODO: discolm prompt https://huggingface.co/DiscoResearch/DiscoLM_German_7b_v1
-print(f"Setting up ollama with {os.getenv('MODEL')}")
-llm = OllamaGenerator(
-    model=os.getenv("MODEL"),
-    url="http://localhost:11434/api/generate"
-)
+from .llm_config import llm
+from .prompt import prompt_builder
+from .vector_store_interface import retriever
 
 answer_builder = AnswerBuilder()
 
