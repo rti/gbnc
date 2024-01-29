@@ -34,7 +34,7 @@ A minimal frontend lets the user input a question and renders the response from 
 
 To build and run the container locally do:
 ```
-docker build . -t gbnc
+DOCKER_BUILDKIT=1 docker build . -t gbnc
 docker run -p 8000:8000 --rm -it gbnc
 ```
 Then you can point your browser to http://localhost:8000/ and use the frontend.
