@@ -31,7 +31,8 @@ RUN pip install haystack-ai
 RUN pip install ollama-haystack
 
 # Pull a language model
-ARG MODEL=phi
+# ARG MODEL=phi
+ARG MODEL=stablelm2:zephyr
 ENV MODEL=${MODEL}
 RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama pull $MODEL
 
@@ -42,12 +43,6 @@ RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama
 # COPY --chmod=644 Modelfile Modelfile
 # RUN curl --location https://huggingface.co/TheBloke/DiscoLM_German_7b_v1-GGUF/resolve/main/discolm_german_7b_v1.Q5_K_S.gguf?download=true --output discolm_german_7b_v1.Q5_K_S.gguf; ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama create ${MODEL} -f Modelfile && rm -rf /tmp/model
 
-# Setup the custom API and frontend
-WORKDIR /workspace
-COPY --chmod=644 gswikichat gswikichat
-COPY --chmod=755 frontend frontend
-COPY --chmod=755 json_input json_input
-
 # Install node from upstream, ubuntu packages are too old
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash
 RUN apt-get install -y nodejs && \
@@ -57,8 +52,19 @@ RUN apt-get install -y nodejs && \
 # Install node package manager yarn 
 RUN npm install -g yarn
 
-# Install frontend dependencies and build it for production (into the frontend/dist folder)
-RUN cd frontend && yarn install && yarn build
+# Setup the custom API and frontend
+WORKDIR /workspace
+COPY --chmod=644 gswikichat gswikichat
+COPY --chmod=755 json_input json_input
+
+# Install frontend dependencies
+COPY --chmod=755 frontend/package.json frontend/package.json
+COPY --chmod=755 frontend/yarn.lock frontend/yarn.lock
+RUN cd frontend && yarn install
+
+# Build frontend for production (into the frontend/dist folder)
+COPY --chmod=755 frontend frontend
+RUN cd frontend && yarn build
 
 # Container start script
 COPY --chmod=755 start.sh /start.sh

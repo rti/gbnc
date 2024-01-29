@@ -24,6 +24,8 @@ async def api(q):
         }
     )
     answer = results["answer_builder"]["answers"][0]
+
+    # TODO: do not respond when there are no sources
     return {
         "answer": answer.data,
         "sources": [{
