@@ -4,3 +4,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-light-content dark:bg-dark-content;
+  }
+}
+
+@layer components {
+  .elem-shadow-sm {
+    @apply shadow-sm shadow-zinc-700;
+  }
+
+  .link-text {
+    @apply text-light-link-text dark:text-dark-link-text hover:text-light-link-text-hover dark:hover:text-dark-link-text-hover;
+  }
+}
