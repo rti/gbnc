@@ -5,22 +5,6 @@ from haystack import Document
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 
-# TODO: FAISS: Facebook AI Similarity Search
-# from haystack.nodes import Seq2SeqGenerator
-# from haystack.utils import convert_files_to_dicts, fetch_archive_from_http, clean_wiki_text
-# from haystack.nodes import EmbeddingRetriever, DensePassageRetriever
-# from haystack.document_stores.faiss import FAISSDocumentStore
-
-# document_store = FAISSDocumentStore(
-#     faiss_index_factory_str="Flat", vector_dim=128)
-
-# retriever = EmbeddingRetriever(document_store=document_store,
-#                                embedding_model="yjernite/retribert-base-uncased", model_format="retribert")
-
-# document_store.delete_documents()
-# # document_store.save("my_faiss_index.faiss")
-# new_document_store = FAISSDocumentStore.load("my_faiss_index.faiss")
-
 top_k = 5
 documents = []
 
