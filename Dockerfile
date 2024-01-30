@@ -45,20 +45,8 @@ RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama
 # Setup the custom API and frontend
 WORKDIR /workspace
 COPY --chmod=644 gswikichat gswikichat
-COPY --chmod=755 frontend frontend
+COPY --chmod=755 static static
 COPY --chmod=755 json_input json_input
-
-# Install node from upstream, ubuntu packages are too old
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash
-RUN apt-get install -y nodejs && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install node package manager yarn 
-RUN npm install -g yarn
-
-# Install frontend dependencies and build it for production (into the frontend/dist folder)
-RUN cd frontend && yarn install && yarn build
 
 # Container start script
 COPY --chmod=755 start.sh /start.sh
