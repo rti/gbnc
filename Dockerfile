@@ -29,7 +29,7 @@ RUN pip install "uvicorn[standard]"
 # RAG framework haystack
 RUN pip install haystack-ai
 RUN pip install ollama-haystack
-RUN pip install jina-haystack
+RUN pip install "sentence-transformers>=2.2.0"
 
 # Pull a language model (see LICENSE_STABLELM2.txt)
 ARG MODEL=stablelm2:1.6b-zephyr

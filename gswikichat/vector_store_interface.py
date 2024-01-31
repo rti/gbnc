@@ -1,21 +1,24 @@
 import os
 import json
 
-from haystack import Document
+from haystack import Document, Pipeline
+from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
+from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
+from haystack.components.writers import DocumentWriter
 
 top_k = 5
-documents = []
+input_documents = []
 
 if os.path.isfile("./json_input/excellent-articles.json"):
     with open("./json_input/excellent-articles.json", 'r') as f:
         json_obj = json.load(f)
         for k, v in json_obj.items():
             print(f"Loading {k}")
-            documents.append(Document(content=v, meta={"src": k}))
+            input_documents.append(Document(content=v, meta={"src": k}))
 else:
-    documents = [
+    input_documents = [
         Document(
             content="My name is Asra, I live in Paris.",
             meta={"src": "doc_1"}
@@ -31,10 +34,32 @@ else:
     ]
 
 # Write documents to InMemoryDocumentStore
-document_store = InMemoryDocumentStore()
-document_store.write_documents(documents)
+document_store = InMemoryDocumentStore(embedding_similarity_function="cosine")
+# document_store.write_documents(input_documents)
 
-retriever = InMemoryBM25Retriever(
+
+embedder = SentenceTransformersDocumentEmbedder(
+    model="sentence-transformers/all-MiniLM-L6-v2"
+)
+embedder.warm_up()
+
+documents_with_embeddings = embedder.run(input_documents)
+document_store.write_documents(documents_with_embeddings['documents'])
+
+retriever = InMemoryEmbeddingRetriever(
+    # embedding_model="sentence-transformers/all-MiniLM-L6-v2",
     document_store=document_store,
     top_k=top_k
 )
+
+# writer = DocumentWriter(document_store=document_store)
+
+# indexing_pipeline = Pipeline()
+# indexing_pipeline.add_component("embedder", embedder)
+# indexing_pipeline.add_component("writer", writer)
+# indexing_pipeline.connect("embedder", "writer")
+# indexing_pipeline.run(
+#     {
+#         "embedder": {"documents": input_documents}
+#     }
+# )
