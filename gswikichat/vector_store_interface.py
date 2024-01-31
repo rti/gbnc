@@ -62,9 +62,9 @@ document_store = InMemoryDocumentStore(
 
 # TODO Introduce Jina.AI from HuggingFace. Establish env-variable for trust_...
 embedder = SentenceTransformersDocumentEmbedder(
-    # model="sentence-transformers/all-MiniLM-L6-v2",
-    model="jinaai/jina-embeddings-v2-base-de",
-    token='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'
+    model="sentence-transformers/all-MiniLM-L6-v2",
+    # model="jinaai/jina-embeddings-v2-base-de",
+    # token=''
 )
 
 embedder.warm_up()
