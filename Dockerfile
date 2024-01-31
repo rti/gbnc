@@ -33,6 +33,7 @@ RUN pip install "sentence-transformers>=2.2.0"
 
 # Pull a language model (see LICENSE_STABLELM2.txt)
 ARG MODEL=stablelm2:1.6b-zephyr
+# ARG MODEL=phi
 ENV MODEL=${MODEL}
 RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama pull $MODEL
 
