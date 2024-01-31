@@ -29,9 +29,10 @@ RUN pip install "uvicorn[standard]"
 # RAG framework haystack
 RUN pip install haystack-ai
 RUN pip install ollama-haystack
+RUN pip install "sentence-transformers>=2.2.0"
 
-# Pull a language model
-ARG MODEL=phi
+# Pull a language model (see LICENSE_STABLELM2.txt)
+ARG MODEL=stablelm2:1.6b-zephyr
 ENV MODEL=${MODEL}
 RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama pull $MODEL
 
@@ -45,8 +46,9 @@ RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama
 # Setup the custom API and frontend
 WORKDIR /workspace
 COPY --chmod=644 gswikichat gswikichat
-COPY --chmod=755 frontend frontend
+COPY --chmod=755 static static
 COPY --chmod=755 json_input json_input
+
 
 # Install node from upstream, ubuntu packages are too old
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
@@ -65,8 +67,8 @@ RUN n 18.17.1
 # Install node package manager yarn 
 RUN npm install -g yarn
 
-# Install frontend dependencies and build it for production (into the frontend/dist folder)
-RUN cd frontend && yarn install && yarn build
+# # Install frontend dependencies and build it for production (into the frontend/dist folder)
+# RUN cd frontend && yarn install && yarn build
 
 # Container start script
 COPY --chmod=755 start.sh /start.sh
