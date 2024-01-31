@@ -1,3 +1,4 @@
+from sentence_transformers import SentenceTransformer
 import os
 import json
 
@@ -9,6 +10,7 @@ from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
 from haystack.components.writers import DocumentWriter
 from haystack.document_stores.types.policy import DuplicatePolicy
 
+HUGGING_FACE_HUB_TOKEN = os.environ.get('HUGGING_FACE_HUB_TOKEN')
 top_k = 5
 input_documents = []
 
@@ -61,15 +63,46 @@ document_store = InMemoryDocumentStore(
 # document_store.write_documents(input_documents)
 
 # TODO Introduce Jina.AI from HuggingFace. Establish env-variable for trust_...
+
+basic_transformer_models = [
+    "all-MiniLM-L6-v2",
+    "xlm-clm-ende-1024",
+    "xlm-mlm-ende-1024",
+    "bert-base-german-cased",
+    "bert-base-german-dbmdz-cased",
+    "bert-base-german-dbmdz-uncased",
+    "distilbert-base-german-cased",
+    "xlm-roberta-large-finetuned-conll03-german"
+]
+
 embedder = SentenceTransformersDocumentEmbedder(
-    model="sentence-transformers/all-MiniLM-L6-v2",
+    model=f"sentence-transformers/{basic_transformer_models[0]}",
+    # model="T-Systems-onsite/german-roberta-sentence-transformer-v2",
     # model="jinaai/jina-embeddings-v2-base-de",
-    # token=''
+    # token=HUGGING_FACE_HUB_TOKEN
 )
+
+# hg_embedder = SentenceTransformer(
+#     "jinaai/jina-embeddings-v2-base-de",
+#     token=HUGGING_FACE_HUB_TOKEN
+# )
 
 embedder.warm_up()
 
 documents_with_embeddings = embedder.run(input_documents)
+# documents_with_embeddings = embedder.encode(input_documents)
+
+
+# print('\n\n')
+# # print(documents_with_embeddings['documents'])
+# print(type(documents_with_embeddings['documents']))
+# print(len(documents_with_embeddings['documents']))
+# print(dir(documents_with_embeddings['documents'][0]))
+# print('\n\n')
+# print(type(embedder.model))
+# print('\n\n')
+# # print(dir(hg_embedder))
+
 
 document_store.write_documents(
     documents=documents_with_embeddings['documents'],
