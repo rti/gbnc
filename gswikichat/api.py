@@ -25,9 +25,18 @@ async def api(q):
     query = Document(content=q)
 
     result = embedder.run([query])
+
+    # print(help(retriever))
     results = retriever.run(
-        result['documents'][0].embedding
+        query_embedding=result['documents'][0].embedding,
+        filters=None,
+        top_k=None,
+        scale_score=None,
+        return_embedding=None
     )
+    # .run(
+    #     result['documents'][0].embedding
+    # )
 
     prompt = prompt_builder.run(documents=results['documents'])['prompt']
 

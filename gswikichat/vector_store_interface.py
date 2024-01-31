@@ -7,6 +7,7 @@ from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
 from haystack.components.writers import DocumentWriter
+from haystack.document_stores.types.policy import DuplicatePolicy
 
 top_k = 5
 input_documents = []
@@ -47,6 +48,7 @@ else:
     ]
 
 # Write documents to InMemoryDocumentStore
+
 document_store = InMemoryDocumentStore(
     embedding_similarity_function="cosine",
     # embedding_dim=768,
@@ -63,7 +65,7 @@ embedder.warm_up()
 documents_with_embeddings = embedder.run(input_documents)
 document_store.write_documents(
     documents=documents_with_embeddings['documents'],
-    duplicate_documents="overwrite"
+    policy=DuplicatePolicy.OVERWRITE
 )
 
 retriever = InMemoryEmbeddingRetriever(
