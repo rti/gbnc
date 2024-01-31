@@ -26,9 +26,8 @@ async def api(q):
 
     result = embedder.run([query])
 
-    # print(help(retriever))
     results = retriever.run(
-        query_embedding=result['documents'][0].embedding,
+        query_embedding=list(result['documents'][0].embedding),
         filters=None,
         top_k=None,
         scale_score=None,

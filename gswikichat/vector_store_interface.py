@@ -26,11 +26,15 @@ if os.path.isfile(json_fpath):
             input_documents.append(Document(content=v, meta={"src": k}))
     elif isinstance(json_obj, list):
         for obj_ in json_obj:
-            meta = obj_['meta']
+            url = obj_['meta']
             content = obj_['content']
-            # print(f"Loading {meta}")
-            # print(content)
-            input_documents.append(Document(content=content, meta=meta))
+
+            input_documents.append(
+                Document(
+                    content=content,
+                    meta={'src': url}
+                )
+            )
 else:
     input_documents = [
         Document(
@@ -56,13 +60,14 @@ document_store = InMemoryDocumentStore(
 )
 # document_store.write_documents(input_documents)
 
-
+# TODO Introduce Jina.AI from HuggingFace. Establish env-variable for trust_...
 embedder = SentenceTransformersDocumentEmbedder(
     model="sentence-transformers/all-MiniLM-L6-v2"
 )
 embedder.warm_up()
 
 documents_with_embeddings = embedder.run(input_documents)
+
 document_store.write_documents(
     documents=documents_with_embeddings['documents'],
     policy=DuplicatePolicy.OVERWRITE
