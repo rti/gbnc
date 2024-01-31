@@ -2,7 +2,7 @@
   <main class="w-screen h-screen bg-light-content dark:bg-dark-content">
     <div class="py-8 space-y-8">
       <h1
-        class="flex justify-center text-4xl space-x-3 md:text-5xl text-light-text dark:text-dark-text font-display"
+        class="flex justify-center space-x-3 text-4xl md:text-5xl text-light-text dark:text-dark-text font-display"
       >
         <Icon icon="ooui:logo-wikimedia" />
         <p class="-mt-[0.025em] md:mt-0">ChatGSWiki</p>
@@ -40,9 +40,9 @@
           </p>
         </div>
       </div>
-      <div class="flex justify-center w-full">
+      <div v-if="response" class="flex justify-center w-full">
         <div class="flex-col w-[90%] md:w-4/5 lg:w-2/3 space-y-5">
-          <FieldQuestion text="What should happen with confidential information?" />
+          <!-- <FieldQuestion :text="inputText" /> -->
           <FieldAnswer :response="response" />
         </div>
       </div>
@@ -54,39 +54,38 @@
 import { Icon } from '@iconify/vue'
 import { ref } from 'vue'
 import FieldAnswer from '../components/field/FieldAnswer.vue'
-import FieldQuestion from '../components/field/FieldQuestion.vue'
 import type { ResponseObject } from '../types/response-object.d.ts'
 
 const inputText = ref('')
 const response = ref<ResponseObject>()
 const inputFocused = ref(false)
 
-response.value = {
-  answer:
-    'Confidential information should not be used or disclosed except as necessary for performance under the agreement.',
-  sources: [
-    {
-      id: 1,
-      src: 'https://example.com/document1',
-      content:
-        'Parties agree that Confidential Information shall not be used or disclosed except as necessary for performance hereunder.',
-      score: 4.975016137070867
-    },
-    {
-      id: 2,
-      src: 'https://example.com/document12',
-      content: 'Any waiver of compliance with any provision of this Agreement must be in writing.',
-      score: 2.1152231308302407
-    },
-    {
-      id: 3,
-      src: 'https://example.com/document19',
-      content:
-        'This Agreement shall be governed by and construed in accordance with the laws of the State of New York.',
-      score: 1.8400423245643809
-    }
-  ]
-}
+// response.value = {
+//   answer:
+//     'Confidential information should not be used or disclosed except as necessary for performance under the agreement.',
+//   sources: [
+//     {
+//       id: 1,
+//       src: 'https://example.com/document1',
+//       content:
+//         'Parties agree that Confidential Information shall not be used or disclosed except as necessary for performance hereunder.',
+//       score: 4.975016137070867
+//     },
+//     {
+//       id: 2,
+//       src: 'https://example.com/document12',
+//       content: 'Any waiver of compliance with any provision of this Agreement must be in writing.',
+//       score: 2.1152231308302407
+//     },
+//     {
+//       id: 3,
+//       src: 'https://example.com/document19',
+//       content:
+//         'This Agreement shall be governed by and construed in accordance with the laws of the State of New York.',
+//       score: 1.8400423245643809
+//     }
+//   ]
+// }
 
 function search() {
   fetch(`/api?q=${inputText.value}`)
