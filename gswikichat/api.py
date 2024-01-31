@@ -8,12 +8,16 @@ from haystack import Document
 
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+app.mount(
+    "/frontend/dist",
+    StaticFiles(directory="frontend/dist", html=True),
+    name="frontend"
+)
 
 
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/static", status_code=302)
+    return RedirectResponse(url="/frontend/dist", status_code=302)
 
 
 @app.get("/api")
