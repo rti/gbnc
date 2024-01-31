@@ -11,12 +11,25 @@ from haystack.components.writers import DocumentWriter
 top_k = 5
 input_documents = []
 
-if os.path.isfile("./json_input/excellent-articles.json"):
-    with open("./json_input/excellent-articles.json", 'r') as f:
-        json_obj = json.load(f)
+json_dir = 'json_input'
+json_fname = 'excellent-articles_10_paragraphs.json'
+json_fpath = os.path.join(json_dir, json_fname)
+
+if os.path.isfile(json_fpath):
+    with open(json_fpath, 'r') as finn:
+        json_obj = json.load(finn)
+
+    if isinstance(json_obj, dict):
         for k, v in json_obj.items():
             print(f"Loading {k}")
             input_documents.append(Document(content=v, meta={"src": k}))
+    elif isinstance(json_obj, list):
+        for obj_ in json_obj:
+            meta = obj_['meta']
+            content = obj_['content']
+            # print(f"Loading {meta}")
+            # print(content)
+            input_documents.append(Document(content=content, meta=meta))
 else:
     input_documents = [
         Document(
@@ -34,7 +47,11 @@ else:
     ]
 
 # Write documents to InMemoryDocumentStore
-document_store = InMemoryDocumentStore(embedding_similarity_function="cosine")
+document_store = InMemoryDocumentStore(
+    embedding_similarity_function="cosine",
+    # embedding_dim=768,
+    # duplicate_documents="overwrite"
+)
 # document_store.write_documents(input_documents)
 
 
@@ -44,7 +61,10 @@ embedder = SentenceTransformersDocumentEmbedder(
 embedder.warm_up()
 
 documents_with_embeddings = embedder.run(input_documents)
-document_store.write_documents(documents_with_embeddings['documents'])
+document_store.write_documents(
+    documents=documents_with_embeddings['documents'],
+    duplicate_documents="overwrite"
+)
 
 retriever = InMemoryEmbeddingRetriever(
     # embedding_model="sentence-transformers/all-MiniLM-L6-v2",
