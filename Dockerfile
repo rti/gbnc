@@ -58,11 +58,11 @@ RUN pip install -r requirements.txt
 # Install frontend dependencies
 COPY --chmod=755 frontend/package.json frontend/package.json
 COPY --chmod=755 frontend/yarn.lock frontend/yarn.lock
-RUN cd frontend && yarn install
+# RUN cd frontend && yarn install
 
 # Copy and build frontend for production (into the frontend/dist folder)
 COPY --chmod=755 frontend frontend
-RUN cd frontend && yarn build
+# RUN cd frontend && yarn build
 
 # Copy backend for production
 COPY --chmod=644 gswikichat gswikichat
