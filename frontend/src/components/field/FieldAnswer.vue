@@ -12,7 +12,7 @@
     <div v-else>
       <div v-if="response && response.sources">
         <div v-for="s in response.sources" :key="s.id">
-          <div v-if="s.score > 2" class="mb-2">
+          <div v-if="s.score > 0" class="mb-2">
             <details
               class="text-sm cursor-pointer text-light-distinct-text dark:text-dark-distinct-text"
             >
