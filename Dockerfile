@@ -22,7 +22,7 @@ RUN apt-get update -y && \
 
 
 # Install node from upstream, ubuntu packages are too old
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash
 RUN apt-get install -y nodejs && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
