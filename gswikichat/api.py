@@ -31,7 +31,7 @@ async def api(q):
     retrieverResults = retriever.run(
         query_embedding=list(queryEmbedding),
         filters=None,
-        top_k=None,
+        top_k=3,
         scale_score=None,
         return_embedding=None
     )
