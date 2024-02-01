@@ -40,7 +40,7 @@ async def api(q):
     for retrieverResult in retrieverResults:
         print(retrieverResult)
 
-    promptBuild = prompt_builder.run(documents=retrieverResults['documents'])
+    promptBuild = prompt_builder.run(question=q, documents=retrieverResults['documents'])
     prompt = promptBuild['prompt']
 
     print("prompt: ", prompt)
