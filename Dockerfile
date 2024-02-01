@@ -42,13 +42,6 @@ ARG MODEL=stablelm2:1.6b-zephyr
 ENV MODEL=${MODEL}
 RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama pull $MODEL
 
-# Build a language model
-# ARG MODEL=discolm
-# ENV MODEL=${MODEL}
-# WORKDIR /tmp/model
-# COPY --chmod=644 Modelfile Modelfile
-# RUN curl --location https://huggingface.co/TheBloke/DiscoLM_German_7b_v1-GGUF/resolve/main/discolm_german_7b_v1.Q5_K_S.gguf?download=true --output discolm_german_7b_v1.Q5_K_S.gguf; ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama create ${MODEL} -f Modelfile && rm -rf /tmp/model
-
 
 # Setup the custom API and frontend
 WORKDIR /workspace
