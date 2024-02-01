@@ -8,6 +8,8 @@ from haystack.components.embedders import SentenceTransformersDocumentEmbedder
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
 from haystack.document_stores.types.policy import DuplicatePolicy
+from haystack.components.preprocessors import DocumentSplitter
+from haystack.components.preprocessors import DocumentCleaner
 
 HUGGING_FACE_HUB_TOKEN = os.environ.get('HUGGING_FACE_HUB_TOKEN')
 EMBEDDING_CACHE_FILE = '/tmp/gbnc_embeddings.json'
@@ -16,7 +18,8 @@ top_k = 5
 input_documents = []
 
 json_dir = 'json_input'
-json_fname = 'excellent-articles_10_paragraphs.json'
+json_fname = 'excellent-articles_10.json'
+
 json_fpath = os.path.join(json_dir, json_fname)
 
 if os.path.isfile(json_fpath):
@@ -28,11 +31,11 @@ if os.path.isfile(json_fpath):
         for k, v in tqdm(json_obj.items()):
             print(f"Loading {k}")
             input_documents.append(Document(content=v, meta={"src": k}))
+
     elif isinstance(json_obj, list):
         for obj_ in tqdm(json_obj):
             url = obj_['meta']
             content = obj_['content']
-
             input_documents.append(
                 Document(
                     content=content,
@@ -55,7 +58,14 @@ else:
         ),
     ]
 
-# Write documents to InMemoryDocumentStore
+# cleaner = DocumentCleaner(
+#         remove_empty_lines=True,
+#         remove_extra_whitespaces=True,
+#         remove_repeated_substrings=False)
+# input_documents = cleaner.run(input_documents)['documents']
+
+splitter = DocumentSplitter(split_by="sentence", split_length=20, split_overlap=0)
+input_documents = splitter.run(input_documents)['documents']
 
 document_store = InMemoryDocumentStore(
     embedding_similarity_function="cosine",
