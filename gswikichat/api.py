@@ -21,40 +21,49 @@ async def root():
 
 @app.get("/api")
 async def api(q):
+    print("query: ", q)
 
     query = Document(content=q)
 
-    result = embedder.run([query])
+    queryEmbedded = embedder.run([query])
+    queryEmbedding = queryEmbedded['documents'][0].embedding
 
-    results = retriever.run(
-        query_embedding=list(result['documents'][0].embedding),
+    retrieverResults = retriever.run(
+        query_embedding=list(queryEmbedding),
         filters=None,
         top_k=None,
         scale_score=None,
         return_embedding=None
     )
 
-    prompt = prompt_builder.run(documents=results['documents'])['prompt']
+    print("retriever results:")
+    for retrieverResult in retrieverResults:
+        print(retrieverResult)
+
+    promptBuild = prompt_builder.run(documents=retrieverResults['documents'])
+    prompt = promptBuild['prompt']
+
+    print("prompt: ", prompt)
 
     response = llm.run(prompt=prompt, generation_kwargs=None)
 
-
-    results = answer_builder.run(
+    answerBuild = answer_builder.run(
         query=q,
         replies=response['replies'],
         meta=response['meta'],
-        documents=results['documents'],
+        documents=retrieverResults['documents'],
         pattern=None,
         reference_pattern=None
     )
+    print("answerBuild", answerBuild)
 
-    answer = results['answers'][0]
+    answer = answerBuild['answers'][0]
+
+    sources= [{ "src": d.meta['src'], "content": d.content, "score": d.score } for d in answer.documents]
+
+    print("answer", answer)
 
     return {
         "answer": answer.data,
-        "sources": [{
-            "src": d.meta['src'],
-            "content": d.content,
-            "score": d.score
-        } for d in answer.documents]
+        "sources": sources
     }
