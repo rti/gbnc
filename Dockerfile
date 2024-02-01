@@ -1,10 +1,16 @@
 ARG CUDA_VERSION="11.8.0"
 ARG CUDNN_VERSION="8"
 ARG UBUNTU_VERSION="22.04"
-ARG DOCKER_FROM=nvidia/cuda:$CUDA_VERSION-cudnn$CUDNN_VERSION-devel-ubuntu$UBUNTU_VERSION
+ARG CUDA_FROM=nvidia/cuda:$CUDA_VERSION-cudnn$CUDNN_VERSION-devel-ubuntu$UBUNTU_VERSION
+
+ARG OLLAMA_VERSION="0.1.22"
+ARG OLLAMA_FROM=ollama/ollama:$OLLAMA_VERSION
+FROM $OLLAMA_FROM as ollama
 
 # Base NVidia CUDA Ubuntu image
-FROM $DOCKER_FROM AS base
+FROM $CUDA_FROM
+
+ENV PATH="/usr/local/cuda/bin:${PATH}"
 
 # Install essential packages from ubuntu repository
 RUN apt-get update -y && \
@@ -14,10 +20,10 @@ RUN apt-get update -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/usr/local/cuda/bin:${PATH}"
-
 # Install ollama llm inference engine
-RUN curl https://ollama.ai/install.sh | sh
+COPY --from=ollama /usr/bin/ollama /usr/local/ollama/bin/ollama
+ENV PATH="/usr/local/ollama/bin:${PATH}"
+# RUN curl https://ollama.ai/install.sh | sh
 
 # Upgrade pip
 RUN python3 -m pip install --upgrade pip
@@ -27,8 +33,7 @@ RUN pip install fastapi
 RUN pip install "uvicorn[standard]"
 
 # RAG framework haystack
-RUN pip install haystack-ai
-RUN pip install ollama-haystack
+# RUN pip install "sentence-transformers>=2.2.0"
 
 # Pull a language model (see LICENSE_STABLELM2.txt)
 ARG MODEL=stablelm2:1.6b-zephyr
@@ -44,9 +49,28 @@ RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama
 
 # Setup the custom API and frontend
 WORKDIR /workspace
-COPY --chmod=644 gswikichat gswikichat
+
+# Install backend dependencies
+COPY --chmod=755 requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+# Install frontend dependencies
+COPY --chmod=755 frontend/package.json frontend/package.json
+COPY --chmod=755 frontend/yarn.lock frontend/yarn.lock
+# RUN cd frontend && yarn install
+
+# Copy and build frontend for production (into the frontend/dist folder)
 COPY --chmod=755 frontend frontend
+# RUN cd frontend && yarn build
+
+# Copy backend for production
+COPY --chmod=644 gswikichat gswikichat
+
+# Copy data
 COPY --chmod=755 json_input json_input
+
+# Install node from upstream, ubuntu packages are too old
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 
 # Install node from upstream, ubuntu packages are too old
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash
@@ -54,12 +78,18 @@ RUN apt-get install -y nodejs && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN npm cache clean -f
+RUN npm install -g n
+RUN n 18.17.1
+
+# RUN node -v
+
 # Install node package manager yarn 
 RUN npm install -g yarn
 
 # Install frontend dependencies and build it for production (into the frontend/dist folder)
 RUN cd frontend && yarn install && yarn build
 
-# Container start script
+# Container startup script
 COPY --chmod=755 start.sh /start.sh
 CMD [ "/start.sh" ]

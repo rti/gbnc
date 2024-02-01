@@ -9,7 +9,9 @@
 To build and run the container locally with hot reload on python files do:
 ```
 DOCKER_BUILDKIT=1 docker build . -t gbnc
-docker run -v "$(pwd)/gswikichat":/workspace/gswikichat -p 8000:8000 --rm --name gbnc -it gbnc
+docker run  -v "$(pwd)/gswikichat":/workspace/gswikichat \
+            -p 8000:8000 --rm --name gbnc -it gbnc \
+            -e HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN
 ```
 Point your browser to http://localhost:8000/ and use the frontend.
 
