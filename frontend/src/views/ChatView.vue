@@ -41,9 +41,14 @@
         </div>
       </div>
       <div v-if="response" class="flex justify-center w-full">
-        <div class="flex-col w-[90%] md:w-4/5 lg:w-2/3 space-y-5">
+        <div class="flex-col w-[90%] md:w-4/5 lg:w-2/3 space-y-7">
           <!-- <FieldQuestion :text="inputText" /> -->
-          <FieldAnswer :response="response" />
+          <FieldAnswer :response="response" :isLoading="false" />
+        </div>
+      </div>
+      <div v-else-if="displayResponse && !response" class="flex justify-center w-full">
+        <div class="flex-col w-[90%] md:w-4/5 lg:w-2/3 space-y-5">
+          <FieldAnswer :isLoading="true" />
         </div>
       </div>
     </div>
@@ -54,10 +59,12 @@
 import { Icon } from '@iconify/vue'
 import { ref } from 'vue'
 import FieldAnswer from '../components/field/FieldAnswer.vue'
+// import FieldQuestion from '../components/field/FieldQuestion.vue'
 import type { ResponseObject } from '../types/response-object.d.ts'
 
 const inputText = ref('')
 const response = ref<ResponseObject>()
+let displayResponse = ref(false)
 const inputFocused = ref(false)
 
 // response.value = {
@@ -88,6 +95,7 @@ const inputFocused = ref(false)
 // }
 
 function search() {
+  displayResponse.value = true
   fetch(`/api?q=${inputText.value}`)
     .then((response) => response.json())
     .then((data) => {
