@@ -27,6 +27,7 @@ RUN apt-get install -y nodejs && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+
 # Install node package manager yarn 
 RUN npm install -g yarn
 
@@ -34,6 +35,7 @@ RUN npm install -g yarn
 # Install ollama llm inference engine
 COPY --from=ollama /usr/bin/ollama /usr/local/ollama/bin/ollama
 ENV PATH="/usr/local/ollama/bin:${PATH}"
+
 
 # Pull a language model (see LICENSE_STABLELM2.txt)
 ARG MODEL=stablelm2:1.6b-zephyr
@@ -62,15 +64,18 @@ COPY --chmod=755 frontend/yarn.lock frontend/yarn.lock
 RUN cd frontend && yarn install
 
 
-# Copy and build frontend for production (into the frontend/dist folder)
-COPY --chmod=755 frontend frontend
-RUN cd frontend && yarn build
+# Copy data
+COPY --chmod=755 json_input json_input
+
 
 # Copy backend for production
 COPY --chmod=644 gswikichat gswikichat
 
-# Copy data
-COPY --chmod=755 json_input json_input
+
+# Copy and build frontend for production (into the frontend/dist folder)
+COPY --chmod=755 frontend frontend
+RUN cd frontend && yarn build
+
 
 # Container startup script
 COPY --chmod=755 start.sh /start.sh
