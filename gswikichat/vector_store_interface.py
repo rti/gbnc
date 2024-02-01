@@ -10,6 +10,8 @@ from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
 from haystack.document_stores.types.policy import DuplicatePolicy
 
 HUGGING_FACE_HUB_TOKEN = os.environ.get('HUGGING_FACE_HUB_TOKEN')
+EMBEDDING_CACHE_FILE = '/tmp/gbnc_embeddings.json'
+
 top_k = 5
 input_documents = []
 
@@ -63,28 +65,37 @@ document_store = InMemoryDocumentStore(
 
 # https://huggingface.co/svalabs/german-gpl-adapted-covid
 sentence_transformer_model = 'svalabs/german-gpl-adapted-covid'
-
-print(f'Sentence Transformer Name:{sentence_transformer_model}')
+print(f'Sentence Transformer Name: {sentence_transformer_model}')
 
 embedder = SentenceTransformersDocumentEmbedder(
     model=sentence_transformer_model,
-    # model="T-Systems-onsite/german-roberta-sentence-transformer-v2",
-    # model="jinaai/jina-embeddings-v2-base-de",
-    # token=HUGGING_FACE_HUB_TOKEN
 )
-
 embedder.warm_up()
 
-documents_with_embeddings = embedder.run(input_documents)
 
+# if os.path.isfile(EMBEDDING_CACHE_FILE):
+#     print("[INFO] Loading embeddings from cache")
+#
+#     with open(EMBEDDING_CACHE_FILE, 'r') as f:
+#         documentsDict = json.load(f)
+#         document_store.write_documents(
+#             documents=[Document.from_dict(d) for d in documentsDict],
+#             policy=DuplicatePolicy.OVERWRITE
+#         )
+#
+# else:
+if True:
+    embedded = embedder.run(input_documents)
+    document_store.write_documents(
+        documents=embedded['documents'],
+        policy=DuplicatePolicy.OVERWRITE
+    )
 
-document_store.write_documents(
-    documents=documents_with_embeddings['documents'],
-    policy=DuplicatePolicy.OVERWRITE
-)
+    with open(EMBEDDING_CACHE_FILE, 'w') as f:
+        documentsDict = [Document.to_dict(d) for d in embedded['documents']]
+        json.dump(documentsDict, f)
 
 retriever = InMemoryEmbeddingRetriever(
-    # embedding_model="sentence-transformers/all-MiniLM-L6-v2",
     document_store=document_store,
     top_k=top_k
 )
