@@ -24,6 +24,19 @@ Point your browser to http://localhost:8000/ and use the frontend.
 
 The container works on [runpod.io](https://www.runpod.io/) GPU instances. A [template is available here](https://runpod.io/gsc?template=0w8z55rf19&ref=yfvyfa0s).
 
+### Local development
+#### Backend
+```
+python -m venv .venv
+. ./.venv/bin/activate
+pip install -r requirements.txt
+```
+#### Frontend
+```
+cd frontend
+yarn dev
+```
+
 ## What's in the box
 
 ### Docker container
