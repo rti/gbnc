@@ -8,7 +8,7 @@ body:
       options:
         - label: I have searched [open and closed issues](https://github.com/rti/gbnc/issues?q=is%3Aissue)
           required: true
-        - label: I agree to follow gbnc's [Code of Conduct](https://github.com/rti/gbnc/blob/main/.github/CODE_OF_CONDUCT.md)
+        - label: I agree to follow [Wikimedia's Code of Conduct](https://www.mediawiki.org/wiki/Code_of_Conduct)
           required: true
   - type: textarea
     id: issue
