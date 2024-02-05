@@ -20,7 +20,7 @@ async def root():
 
 
 @app.get("/api")
-async def api(q):
+async def api(q, top_k = 3):
     print("query: ", q)
 
     query = Document(content=q)
@@ -31,7 +31,7 @@ async def api(q):
     retrieverResults = retriever.run(
         query_embedding=list(queryEmbedding),
         filters=None,
-        top_k=3,
+        top_k=top_k,
         scale_score=None,
         return_embedding=None
     )

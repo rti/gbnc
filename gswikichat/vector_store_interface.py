@@ -105,8 +105,5 @@ if True:
         documentsDict = [Document.to_dict(d) for d in embedded['documents']]
         json.dump(documentsDict, f)
 
-retriever = InMemoryEmbeddingRetriever(
-    document_store=document_store,
-    top_k=top_k
-)
+retriever = InMemoryEmbeddingRetriever(document_store=document_store)
 
