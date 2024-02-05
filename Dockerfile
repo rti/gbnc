@@ -51,6 +51,11 @@ COPY --chmod=755 requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 
+# Load sentence-transformers model once in order to cache it in the image
+# TODO: ARG / ENV for embedder model
+RUN echo "from haystack.components.embedders import SentenceTransformersDocumentEmbedder\nSentenceTransformersDocumentEmbedder(model='svalabs/german-gpl-adapted-covid').warm_up()" | python3
+
+
 # Install frontend dependencies
 COPY --chmod=755 frontend/package.json frontend/package.json
 COPY --chmod=755 frontend/yarn.lock frontend/yarn.lock
