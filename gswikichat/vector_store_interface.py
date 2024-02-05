@@ -64,7 +64,7 @@ else:
 #         remove_repeated_substrings=False)
 # input_documents = cleaner.run(input_documents)['documents']
 
-splitter = DocumentSplitter(split_by="sentence", split_length=20, split_overlap=0)
+splitter = DocumentSplitter(split_by="sentence", split_length=5, split_overlap=0)
 input_documents = splitter.run(input_documents)['documents']
 
 document_store = InMemoryDocumentStore(
