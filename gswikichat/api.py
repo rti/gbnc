@@ -20,8 +20,13 @@ async def root():
 
 
 @app.get("/api")
-async def api(q, top_k = 3):
-    print("query: ", q)
+async def api(q, top_k = 3, lang = 'en'):
+    if not lang in ['en', 'de']:
+        raise Exception("language must be 'en' or 'de'") 
+
+    print(f"{q=}")
+    print(f"{top_k=}")
+    print(f"{lang=}")
 
     query = Document(content=q)
 
@@ -40,10 +45,11 @@ async def api(q, top_k = 3):
     for retrieverResult in retrieverResults:
         print(retrieverResult)
 
-    promptBuild = prompt_builder.run(question=q, documents=retrieverResults['documents'])
+    promptBuilder = prompt_builder[lang] 
+    promptBuild = promptBuilder.run(question=q, documents=retrieverResults['documents'])
     prompt = promptBuild['prompt']
 
-    print("prompt: ", prompt)
+    print(f"{prompt=}")
 
     response = llm.run(prompt=prompt, generation_kwargs=None)
 
