@@ -1,0 +1,23 @@
+name: ❓ Questions and everything else
+description: We'd love to hear from you!
+body:
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Terms
+      options:
+        - label: I have searched [open and closed issues](https://github.com/rti/gbnc/issues?q=is%3Aissue)
+          required: true
+        - label: I agree to follow [Wikimedia's Code of Conduct](https://www.mediawiki.org/wiki/Code_of_Conduct)
+          required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: Issue
+      placeholder: Ask a question, start a discussion, create an issue...
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your contribution!
