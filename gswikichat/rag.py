@@ -1,26 +1,63 @@
 # from haystack import Pipeline
+from haystack import Document
 from haystack.components.builders.answer_builder import AnswerBuilder
 
-answer_builder = AnswerBuilder()
+from .llm_config import llm
+from .logger import get_logger
+from .prompt import prompt_builders
+from .vector_store_interface import embedder, retriever, input_documents
 
-# rag_pipeline = Pipeline()
-# rag_pipeline.add_component("text_embedder", embedder)
-# rag_pipeline.add_component("retriever", retriever)
-# # rag_pipeline.add_component("writer", writer)
-# rag_pipeline.add_component("prompt_builder", prompt_builder)
-# rag_pipeline.add_component("llm", llm)
-# rag_pipeline.add_component("answer_builder", answer_builder)
+# Create logger instance from base logger config in `logger.py`
+logger = get_logger(__name__)
 
-# # rag_pipeline.connect("embedder", "writer")
-# rag_pipeline.connect("retriever.documents", "text_embedder")
-# rag_pipeline.connect("retriever", "prompt_builder.documents")
-# rag_pipeline.connect("prompt_builder", "llm")
-# rag_pipeline.connect("llm.replies", "answer_builder.replies")
-# rag_pipeline.connect("llm.metadata", "answer_builder.meta")
-# rag_pipeline.connect("retriever", "answer_builder.documents")
 
-# rag_pipeline.run(
-#     {
-#         "text_embedder": {"documents": input_documents}
-#     }
-# )
+def rag_pipeline(query: str = None, top_k: int = 3, lang: str = 'de'):
+
+    assert (query is not None)
+
+    if isinstance(query, str):
+        query = Document(content=query)
+
+    assert (isinstance(query, Document))
+
+    query_embedded = embedder.run([query])
+    query_embedding = query_embedded['documents'][0].embedding
+
+    retriever_results = retriever.run(
+        query_embedding=list(query_embedding),
+        filters=None,
+        top_k=top_k,
+        scale_score=None,
+        return_embedding=None
+    )
+
+    logger.debug('retriever results:')
+    for retriever_result_ in retriever_results:
+        logger.debug(retriever_result_)
+
+    prompt_builder = prompt_builders[lang]
+
+    prompt_build = prompt_builder.run(
+        question=query.content,  # As a Document instance, .content returns a string
+        documents=retriever_results['documents']
+    )
+
+    prompt = prompt_build['prompt']
+
+    logger.debug(f'{prompt=}')
+
+    response = llm.run(prompt=prompt, generation_kwargs=None)
+
+    answer_builder = AnswerBuilder()
+    answer_build = answer_builder.run(
+        query=query.content,  # As a Document class, .content returns the string
+        replies=response['replies'],
+        meta=response['meta'],
+        documents=retriever_results['documents'],
+        pattern=None,
+        reference_pattern=None
+    )
+
+    logger.debug(f'{answer_build=}')
+
+    return answer_build['answers'][0]
