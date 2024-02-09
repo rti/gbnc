@@ -7,6 +7,7 @@ from haystack import Document
 
 # TODO: Test if this can be included in the `__init__.py` file
 import logging
+import sys
 
 logging.basicConfig(
     filename='gbnc.log',
