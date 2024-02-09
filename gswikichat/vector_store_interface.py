@@ -11,6 +11,12 @@ from haystack.document_stores.types.policy import DuplicatePolicy
 from haystack.components.preprocessors import DocumentSplitter
 from haystack.components.preprocessors import DocumentCleaner
 
+
+from .logger import get_logger
+
+# Create logger instance from base logger config in `logger.py`
+logger = get_logger(__name__)
+
 HUGGING_FACE_HUB_TOKEN = os.environ.get('HUGGING_FACE_HUB_TOKEN')
 
 # disable this line to disable the embedding cache
@@ -19,31 +25,33 @@ EMBEDDING_CACHE_FILE = '/tmp/gbnc_embeddings.json'
 top_k = 5
 input_documents = []
 
+# TODO: Add the json strings as env variables
 json_dir = 'json_input'
 json_fname = 'excellent-articles_10.json'
 
 json_fpath = os.path.join(json_dir, json_fname)
 
 if os.path.isfile(json_fpath):
-    print(f'[INFO] Loading data from {json_fpath}')
+    logger.info(f'Loading data from {json_fpath}')
     with open(json_fpath, 'r') as finn:
         json_obj = json.load(finn)
 
     if isinstance(json_obj, dict):
-        for k, v in tqdm(json_obj.items()):
-            print(f"Loading {k}")
-            input_documents.append(Document(content=v, meta={"src": k}))
-
-    elif isinstance(json_obj, list):
-        for obj_ in tqdm(json_obj):
-            url = obj_['meta']
-            content = obj_['content']
-            input_documents.append(
-                Document(
-                    content=content,
-                    meta={'src': url}
-                )
+        input_documents = [
+            Document(
+                content=content_,
+                meta={"src": url_}
             )
+            for url_, content_ in tqdm(json_obj.items())
+        ]
+    elif isinstance(json_obj, list):
+        input_documents = [
+            Document(
+                content=obj_['content'],
+                meta={'src': obj_['meta']}
+            )
+            for obj_ in tqdm(json_obj)
+        ]
 else:
     input_documents = [
         Document(
@@ -60,13 +68,18 @@ else:
         ),
     ]
 
-splitter = DocumentSplitter(split_by="sentence", split_length=5, split_overlap=0)
+splitter = DocumentSplitter(
+    split_by="sentence",
+    split_length=5,
+    split_overlap=0
+)
 input_documents = splitter.run(input_documents)['documents']
 
 cleaner = DocumentCleaner(
-        remove_empty_lines=True,
-        remove_extra_whitespaces=True,
-        remove_repeated_substrings=False)
+    remove_empty_lines=True,
+    remove_extra_whitespaces=True,
+    remove_repeated_substrings=False
+)
 input_documents = cleaner.run(input_documents)['documents']
 
 
@@ -78,7 +91,7 @@ document_store = InMemoryDocumentStore(
 
 # https://huggingface.co/svalabs/german-gpl-adapted-covid
 sentence_transformer_model = 'svalabs/german-gpl-adapted-covid'
-print(f'Sentence Transformer Name: {sentence_transformer_model}')
+logger.info(f'Sentence Transformer Name: {sentence_transformer_model}')
 
 embedder = SentenceTransformersDocumentEmbedder(
     model=sentence_transformer_model,
@@ -87,17 +100,17 @@ embedder.warm_up()
 
 
 if EMBEDDING_CACHE_FILE and os.path.isfile(EMBEDDING_CACHE_FILE):
-    print("[INFO] Loading embeddings from cache")
+    logger.info('Loading embeddings from cache')
 
-    with open(EMBEDDING_CACHE_FILE, 'r') as f:
-        documentsDict = json.load(f)
+    with open(EMBEDDING_CACHE_FILE, 'r') as f_in:
+        documents_dict = json.load(f_in)
         document_store.write_documents(
-            documents=[Document.from_dict(d) for d in documentsDict],
+            documents=[Document.from_dict(d_) for d_ in documents_dict],
             policy=DuplicatePolicy.OVERWRITE
         )
 
 else:
-    print("[INFO] Generating embeddings")
+    logger.debug("Generating embeddings")
 
     embedded = embedder.run(input_documents)
     document_store.write_documents(
@@ -106,9 +119,11 @@ else:
     )
 
     if EMBEDDING_CACHE_FILE:
-        with open(EMBEDDING_CACHE_FILE, 'w') as f:
-            documentsDict = [Document.to_dict(d) for d in embedded['documents']]
-            json.dump(documentsDict, f)
+        with open(EMBEDDING_CACHE_FILE, 'w') as f_out:
+            documents_dict = [
+                Document.to_dict(d_)
+                for d_ in embedded['documents']
+            ]
+            json.dump(documents_dict, f_out)
 
 retriever = InMemoryEmbeddingRetriever(document_store=document_store)
-
