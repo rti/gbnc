@@ -67,7 +67,7 @@ COPY --chmod=755 json_input json_input
 
 
 # Copy backend for production
-COPY --chmod=644 gswikichat gswikichat
+COPY --chmod=755 gswikichat gswikichat
 
 
 # Copy and build frontend for production (into the frontend/dist folder)
