@@ -49,7 +49,7 @@ Mit diesen Dokumenten, beantworte die folgende Frage: {{question}}
 # {% endfor %}
 # """
 
-prompt_builder = {
- 'en': PromptBuilder(template=prompt_template_en),
- 'de': PromptBuilder(template=prompt_template_de),
+prompt_builders = {
+    'en': PromptBuilder(template=prompt_template_en),
+    'de': PromptBuilder(template=prompt_template_de),
 }

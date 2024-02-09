@@ -2,10 +2,6 @@
 from haystack import Pipeline
 from haystack.components.builders.answer_builder import AnswerBuilder
 
-from .llm_config import llm
-from .prompt import prompt_builder
-from .vector_store_interface import embedder, retriever, input_documents
-
 answer_builder = AnswerBuilder()
 
 # rag_pipeline = Pipeline()

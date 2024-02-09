@@ -2,10 +2,28 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI
 
-from .rag import embedder, retriever, prompt_builder, llm, answer_builder
+from .rag import answer_builder
+from .llm_config import llm
+from .prompt import prompt_builders
+from .vector_store_interface import embedder, retriever, input_documents
+
 from haystack import Document
 
-homepage = "/frontend/dist"
+import logging
+import sys
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+static_dir = 'frontend/dist'
+homepage = f'/{static_dir}'
 
 app = FastAPI()
 app.mount(
@@ -38,7 +56,7 @@ async def api(query, top_k=3, lang='en'):
     query_embedded = embedder.run([query])
     query_embedding = query_embedded['documents'][0].embedding
 
-    retreiver_results = retriever.run(
+    retriever_results = retriever.run(
         query_embedding=list(query_embedding),
         filters=None,
         top_k=top_k,
@@ -47,7 +65,7 @@ async def api(query, top_k=3, lang='en'):
     )
 
     logger.debug('retriever results:')
-    for retriever_result in retriever_results:
+    for retriever_result_ in retriever_results:
         logger.debug(retriever_result_)
 
     prompt_builder = prompt_builders[lang]
