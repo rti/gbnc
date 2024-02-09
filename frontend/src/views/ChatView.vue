@@ -97,7 +97,7 @@ const inputFocused = ref(false)
 function search() {
   response.value = undefined;
   displayResponse.value = true
-  fetch(`/api?q=${inputText.value}`)
+  fetch(`/api?query=${inputText.value}`)
     .then((response) => response.json())
     .then((data) => {
       response.value = data
