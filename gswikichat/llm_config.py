@@ -6,7 +6,6 @@ from .logger import get_logger
 # Create logger instance from base logger config in `logger.py`
 logger = get_logger(__name__)
 
-
 OLLAMA_MODEL_NAME = os.environ.get("OLLAMA_MODEL_NAME")
 OLLAMA_URL = os.environ.get("OLLAMA_URL")
 OLLAMA_GENERATE_URL = f"{OLLAMA_URL}/api/generate"
