@@ -1,0 +1,31 @@
+name: ✨ Feature request
+description: Have a new idea or feature for gbnc? Please suggest!
+labels: ["feature"]
+body:
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Terms
+      options:
+        - label: I have searched [open and closed feature requests](https://github.com/rti/gbnc/issues?q=is%3Aissue+label%3Afeature)
+          required: true
+        - label: I agree to follow [Wikimedia's Code of Conduct](https://www.mediawiki.org/wiki/Code_of_Conduct)
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: A brief description of the enhancement you propose (with screenshots if applicable).
+    validations:
+      required: true
+  - type: textarea
+    id: contribution
+    attributes:
+      label: Contribution
+      placeholder: Let us know if you'd like to help and how :)
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your suggestion!
