@@ -36,12 +36,15 @@ RUN npm install -g yarn
 COPY --from=ollama /usr/bin/ollama /usr/local/ollama/bin/ollama
 ENV PATH="/usr/local/ollama/bin:${PATH}"
 
-
 # Pull a language model (see LICENSE_STABLELM2.txt)
-# ARG MODEL=openchat
-ARG MODEL=stablelm2:1.6b-zephyr
-ENV MODEL=${MODEL}
-RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama pull $MODEL
+# ARG OLLAMA_MODEL_NAME=openchat
+ARG OLLAMA_MODEL_NAME=stablelm2:1.6b-zephyr
+ARG OLLAMA_URL=http://localhost:11434
+
+ENV OLLAMA_MODEL_NAME=${OLLAMA_MODEL_NAME}
+ENV OLLAMA_URL=${OLLAMA_URL}
+
+RUN ollama serve & while ! curl ${OLLAMA_URL}; do sleep 1; done; ollama pull $OLLAMA_MODEL_NAME
 
 
 # Setup the custom API and frontend

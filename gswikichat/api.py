@@ -36,13 +36,13 @@ logger.addHandler(handler)
 # End of logging logger configuration
 
 
-static_dir = 'frontend/dist'
-homepage = f'/{static_dir}'
+STATIC_DIR = 'frontend/dist'
+LANDING_PAGE = f'/{STATIC_DIR}'
 
 app = FastAPI()
 app.mount(
-    "/frontend/dist",
-    StaticFiles(directory="frontend/dist", html=True),
+    LANDING_PAGE,
+    StaticFiles(directory=STATIC_DIR, html=True),
     name="frontend"
 )
 
@@ -50,7 +50,7 @@ app.mount(
 @app.get("/")
 async def root():
     return RedirectResponse(
-        url="/frontend/dist",
+        url=LANDING_PAGE,
         status_code=308
     )
     # return {}
