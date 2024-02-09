@@ -38,7 +38,7 @@ ENV PATH="/usr/local/ollama/bin:${PATH}"
 
 
 # Pull a language model (see LICENSE_STABLELM2.txt)
-ARG MODEL=stablelm2:1.6b-zephyr
+ARG MODEL=openchat
 ENV MODEL=${MODEL}
 RUN ollama serve & while ! curl http://localhost:11434; do sleep 1; done; ollama pull $MODEL
 
