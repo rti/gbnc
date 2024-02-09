@@ -16,7 +16,8 @@ app.mount(
 
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/frontend/dist", status_code=302)
+    # return RedirectResponse(url="/frontend/dist", status_code=308)
+    return {}
 
 
 @app.get("/api")
