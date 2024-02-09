@@ -12,15 +12,29 @@ from haystack import Document
 import logging
 import sys
 
-logger = logging.getLogger()
+# TODO: Test if this can be added to the `__init__.py` file
+# TODO: Add volume to Dockerfile for `gbnc_api.log` file
+# Source: https://docs.python.org/3/howto/logging.html
+logging.basicConfig(
+    filename='gbnc_api.log',
+    encoding='utf-8',
+    level=logging.DEBUG
+)
+
+# Source: https://stackoverflow.com/questions/14058453/
+# making-python-loggers-output-all-messages-to-stdout-in-addition-to-log-file
+logger = logging.getLogger('gswikicat api')
 logger.setLevel(logging.DEBUG)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+# End of logging logger configuration
+
 
 static_dir = 'frontend/dist'
 homepage = f'/{static_dir}'
