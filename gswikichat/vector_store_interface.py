@@ -12,6 +12,8 @@ from haystack.components.preprocessors import DocumentSplitter
 from haystack.components.preprocessors import DocumentCleaner
 
 HUGGING_FACE_HUB_TOKEN = os.environ.get('HUGGING_FACE_HUB_TOKEN')
+
+# disable this line to disable the embedding cache
 EMBEDDING_CACHE_FILE = '/tmp/gbnc_embeddings.json'
 
 top_k = 5
@@ -83,27 +85,29 @@ embedder = SentenceTransformersDocumentEmbedder(
 embedder.warm_up()
 
 
-# if os.path.isfile(EMBEDDING_CACHE_FILE):
-#     print("[INFO] Loading embeddings from cache")
-#
-#     with open(EMBEDDING_CACHE_FILE, 'r') as f:
-#         documentsDict = json.load(f)
-#         document_store.write_documents(
-#             documents=[Document.from_dict(d) for d in documentsDict],
-#             policy=DuplicatePolicy.OVERWRITE
-#         )
-#
-# else:
-if True:
+if EMBEDDING_CACHE_FILE and os.path.isfile(EMBEDDING_CACHE_FILE):
+    print("[INFO] Loading embeddings from cache")
+
+    with open(EMBEDDING_CACHE_FILE, 'r') as f:
+        documentsDict = json.load(f)
+        document_store.write_documents(
+            documents=[Document.from_dict(d) for d in documentsDict],
+            policy=DuplicatePolicy.OVERWRITE
+        )
+
+else:
+    print("[INFO] Generating embeddings")
+
     embedded = embedder.run(input_documents)
     document_store.write_documents(
         documents=embedded['documents'],
         policy=DuplicatePolicy.OVERWRITE
     )
 
-    with open(EMBEDDING_CACHE_FILE, 'w') as f:
-        documentsDict = [Document.to_dict(d) for d in embedded['documents']]
-        json.dump(documentsDict, f)
+    if EMBEDDING_CACHE_FILE:
+        with open(EMBEDDING_CACHE_FILE, 'w') as f:
+            documentsDict = [Document.to_dict(d) for d in embedded['documents']]
+            json.dump(documentsDict, f)
 
 retriever = InMemoryEmbeddingRetriever(document_store=document_store)
 
