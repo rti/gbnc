@@ -5,70 +5,111 @@ from fastapi import FastAPI
 from .rag import embedder, retriever, prompt_builder, llm, answer_builder
 from haystack import Document
 
+# TODO: Test if this can be included in the `__init__.py` file
+import logging
+
+logging.basicConfig(
+    filename='gbnc.log',
+    encoding='utf-8',
+    level=logging.DEBUG
+)
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# End Logging Handler Formatting
+
+homepage = "/frontend/dist"
 
 app = FastAPI()
 app.mount(
-    "/frontend/dist",
-    StaticFiles(directory="frontend/dist", html=True),
+    homepage,
+    StaticFiles(
+        directory=homepage,
+        html=True
+    ),
     name="frontend"
 )
 
 
 @app.get("/")
 async def root():
-    # return RedirectResponse(url="/frontend/dist", status_code=308)
-    return {}
+    return RedirectResponse(
+        url=homepage,
+        status_code=308
+    )
+    # return {}
 
 
 @app.get("/api")
-async def api(q, top_k = 3, lang = 'en'):
+async def api(query, top_k=3, lang='en'):
     if not lang in ['en', 'de']:
-        raise Exception("language must be 'en' or 'de'") 
+        raise Exception("language must be 'en' or 'de'")
 
-    print(f"{q=}")
-    print(f"{top_k=}")
-    print(f"{lang=}")
+    logger.debug(f'{query=}')  # Assuming we change the input name
+    logger.debug(f'{top_k=}')
+    logger.debug(f'{top_k=}')
 
-    query = Document(content=q)
+    query = Document(content=query)
 
-    queryEmbedded = embedder.run([query])
-    queryEmbedding = queryEmbedded['documents'][0].embedding
+    query_embedded = embedder.run([query])
+    query_embedding = query_embedded['documents'][0].embedding
 
-    retrieverResults = retriever.run(
-        query_embedding=list(queryEmbedding),
+    retreiver_results = retriever.run(
+        query_embedding=list(query_embedding),
         filters=None,
         top_k=top_k,
         scale_score=None,
         return_embedding=None
     )
 
-    print("retriever results:")
-    for retrieverResult in retrieverResults:
-        print(retrieverResult)
+    logger.debug('retriever results:')
+    for retriever_result in retriever_results:
+        logger.debug(retriever_result_)
 
-    promptBuilder = prompt_builder[lang] 
-    promptBuild = promptBuilder.run(question=q, documents=retrieverResults['documents'])
-    prompt = promptBuild['prompt']
+    prompt_builder = prompt_builders[lang]
 
-    print(f"{prompt=}")
+    prompt_build = prompt_builder.run(
+        question=query.content,  # As a Document instance, .content returns a string
+        documents=retriever_results['documents']
+    )
+
+    prompt = prompt_build['prompt']
+
+    logger.debug(f'{prompt=}')
 
     response = llm.run(prompt=prompt, generation_kwargs=None)
 
-    answerBuild = answer_builder.run(
-        query=q,
+    answer_build = answer_builder.run(
+        query=query.content,  # As a Document class, .content returns the string
         replies=response['replies'],
         meta=response['meta'],
-        documents=retrieverResults['documents'],
+        documents=retriever_results['documents'],
         pattern=None,
         reference_pattern=None
     )
-    print("answerBuild", answerBuild)
 
-    answer = answerBuild['answers'][0]
+    logger.debug(f'{answer_build=}')
 
-    sources= [{ "src": d.meta['src'], "content": d.content, "score": d.score } for d in answer.documents]
+    answer = answer_build['answers'][0]
 
-    print("answer", answer)
+    sources = [
+        {
+            "src": d_.meta['src'],
+            "content": d_.content,
+            "score": d_.score
+        } for d_ in answer.documents
+    ]
+
+    logger.debug(f'{answer=}')
 
     return {
         "answer": answer.data,
