@@ -1,5 +1,4 @@
-
-from haystack import Pipeline
+# from haystack import Pipeline
 from haystack.components.builders.answer_builder import AnswerBuilder
 
 answer_builder = AnswerBuilder()
