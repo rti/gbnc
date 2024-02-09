@@ -5,38 +5,12 @@ from fastapi import FastAPI
 from .rag import embedder, retriever, prompt_builder, llm, answer_builder
 from haystack import Document
 
-# TODO: Test if this can be included in the `__init__.py` file
-import logging
-import sys
-
-logging.basicConfig(
-    filename='gbnc.log',
-    encoding='utf-8',
-    level=logging.DEBUG
-)
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# End Logging Handler Formatting
-
 homepage = "/frontend/dist"
 
 app = FastAPI()
 app.mount(
-    homepage,
-    StaticFiles(
-        directory=homepage,
-        html=True
-    ),
+    "/frontend/dist",
+    StaticFiles(directory="frontend/dist", html=True),
     name="frontend"
 )
 
@@ -44,7 +18,7 @@ app.mount(
 @app.get("/")
 async def root():
     return RedirectResponse(
-        url=homepage,
+        url="/frontend/dist",
         status_code=308
     )
     # return {}
