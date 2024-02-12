@@ -11,6 +11,7 @@ from haystack.document_stores.types.policy import DuplicatePolicy
 from haystack.components.preprocessors import DocumentSplitter
 from haystack.components.preprocessors import DocumentCleaner
 
+import torch
 
 from .logger import get_logger
 
@@ -24,6 +25,13 @@ EMBEDDING_CACHE_FILE = '/tmp/gbnc_embeddings.json'
 
 top_k = 5
 input_documents = []
+
+device = "cpu"
+
+if torch.cuda.is_available():
+    logger.info('GPU is available.')
+    device = "cuda"
+
 
 # TODO: Add the json strings as env variables
 json_dir = 'json_input'
@@ -95,6 +103,7 @@ logger.info(f'Sentence Transformer Name: {sentence_transformer_model}')
 
 embedder = SentenceTransformersDocumentEmbedder(
     model=sentence_transformer_model,
+    device=device
 )
 embedder.warm_up()
 
