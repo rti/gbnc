@@ -1,26 +1,21 @@
 # from haystack import Pipeline
 from haystack import Document
 from haystack.components.builders.answer_builder import AnswerBuilder
+from haystack.dataclasses import ChatMessage
 
 from .llm_config import llm
 from .logger import get_logger
-from .prompt import prompt_builders
+from .prompt import user_prompt_builders, system_prompts
 from .vector_store_interface import embedder, retriever, input_documents
 
 # Create logger instance from base logger config in `logger.py`
 logger = get_logger(__name__)
 
 
-def rag_pipeline(query: str = None, top_k: int = 3, lang: str = 'de'):
+def rag_pipeline(query: str, top_k: int = 3, lang: str = 'de'):
 
-    assert (query is not None)
-
-    if isinstance(query, str):
-        query = Document(content=query)
-
-    assert (isinstance(query, Document))
-
-    query_embedded = embedder.run([query])
+    query_document = Document(content=query)
+    query_embedded = embedder.run([query_document])
     query_embedding = query_embedded['documents'][0].embedding
 
     retriever_results = retriever.run(
@@ -35,24 +30,35 @@ def rag_pipeline(query: str = None, top_k: int = 3, lang: str = 'de'):
     for retriever_result_ in retriever_results:
         logger.debug(retriever_result_)
 
-    prompt_builder = prompt_builders[lang]
+    system_prompt = system_prompts[lang]
+    user_prompt_builder = user_prompt_builders[lang]
 
-    prompt_build = prompt_builder.run(
-        question=query.content,  # As a Document instance, .content returns a string
+    user_prompt_build = user_prompt_builder.run(
+        question=query_document.content,
         documents=retriever_results['documents']
     )
 
-    prompt = prompt_build['prompt']
+    prompt = user_prompt_build['prompt']
 
     logger.debug(f'{prompt=}')
 
-    response = llm.run(prompt=prompt, generation_kwargs=None)
+    messages = [
+        ChatMessage.from_system(system_prompt),
+        ChatMessage.from_user(prompt),
+    ]
+
+    response = llm.run(
+        messages, 
+        # generation_kwargs={"temperature": 0.2}
+    )
+
+    logger.debug(response)
 
     answer_builder = AnswerBuilder()
     answer_build = answer_builder.run(
-        query=query.content,  # As a Document class, .content returns the string
+        query=query_document.content,
         replies=response['replies'],
-        meta=response['meta'],
+        meta=[r.meta for r in response['replies']],
         documents=retriever_results['documents'],
         pattern=None,
         reference_pattern=None
