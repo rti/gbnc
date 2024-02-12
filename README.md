@@ -12,7 +12,7 @@ DOCKER_BUILDKIT=1 docker build . -t gbnc
 docker run  \
   --env HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN \
   --volume "$(pwd)/gswikichat":/workspace/gswikichat \
-  --volume "$(pwd)/cache":/root/.cache \
+  --volume gbnc_cache:/root/.cache 
   --publish 8000:8000 \
   --rm \
   --interactive \
