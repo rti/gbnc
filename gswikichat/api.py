@@ -54,6 +54,6 @@ async def api(query, top_k=3, lang='en'):
     logger.debug(f'{answer=}')
 
     return {
-        "answer": answer.data,
+        "answer": answer.data.content,
         "sources": sources
     }
