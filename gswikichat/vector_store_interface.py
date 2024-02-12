@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 HUGGING_FACE_HUB_TOKEN = os.environ.get('HUGGING_FACE_HUB_TOKEN')
 
 # disable this line to disable the embedding cache
-EMBEDDING_CACHE_FILE = '/tmp/gbnc_embeddings.json'
+EMBEDDING_CACHE_FILE = '/root/.cache/gbnc_embeddings.json'
 
 top_k = 5
 input_documents = []
