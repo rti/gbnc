@@ -1,4 +1,4 @@
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI
 
@@ -10,25 +10,23 @@ from .logger import get_logger
 # Create logger instance from base logger config in `logger.py`
 logger = get_logger(__name__)
 
-STATIC_DIR = 'frontend/dist'
-LANDING_PAGE = f'/{STATIC_DIR}'
+FRONTEND_STATIC_DIR = './frontend/dist'
 
 app = FastAPI()
-app.mount(
-    LANDING_PAGE,
-    StaticFiles(directory=STATIC_DIR, html=True),
-    name="frontend"
-)
 
+app.mount(
+    "/assets",
+    StaticFiles(directory=f"{FRONTEND_STATIC_DIR}/assets"),
+    name="frontend-assets"
+)
 
 @app.get("/")
 async def root():
-    return RedirectResponse(
-        url=LANDING_PAGE,
-        status_code=308
-    )
-    # return {}
+    return FileResponse(f"{FRONTEND_STATIC_DIR}/index.html")
 
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse(f"{FRONTEND_STATIC_DIR}/favicon.ico")
 
 @app.get("/api")
 async def api(query, top_k=3, lang='en'):
