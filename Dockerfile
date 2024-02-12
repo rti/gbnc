@@ -36,6 +36,15 @@ RUN npm install -g yarn
 COPY --from=ollama /usr/bin/ollama /usr/local/ollama/bin/ollama
 ENV PATH="/usr/local/ollama/bin:${PATH}"
 
+
+# Setup the app in workspace
+WORKDIR /workspace
+
+# Install backend dependencies
+COPY --chmod=755 requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+
 # Pull a language model (see LICENSE_STABLELM2.txt)
 # ARG OLLAMA_MODEL_NAME=openchat
 ARG OLLAMA_MODEL_NAME=stablelm2:1.6b-zephyr
@@ -45,14 +54,6 @@ ENV OLLAMA_MODEL_NAME=${OLLAMA_MODEL_NAME}
 ENV OLLAMA_URL=${OLLAMA_URL}
 
 RUN ollama serve & while ! curl ${OLLAMA_URL}; do sleep 1; done; ollama pull $OLLAMA_MODEL_NAME
-
-
-# Setup the custom API and frontend
-WORKDIR /workspace
-
-# Install backend dependencies
-COPY --chmod=755 requirements.txt requirements.txt
-RUN pip install -r requirements.txt
 
 
 # Load sentence-transformers model once in order to cache it in the image
