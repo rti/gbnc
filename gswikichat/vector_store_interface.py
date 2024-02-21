@@ -14,13 +14,17 @@ from haystack.components.preprocessors import DocumentCleaner
 import torch
 
 from .logger import get_logger
+from .fetch_articles import fetch_articles
+
 
 # Create logger instance from base logger config in `logger.py`
 logger = get_logger(__name__)
 
 HUGGING_FACE_HUB_TOKEN = os.environ.get('HUGGING_FACE_HUB_TOKEN')
+DOCUMENTS_TOC = os.environ.get('DOCUMENTS_TOC')
 
-# disable this line to disable the embedding cache
+# disable these lines to disable the cache
+DOCUMENTS_CACHE_FILE = '/root/.cache/gbnc_documents.json'
 EMBEDDING_CACHE_FILE = '/root/.cache/gbnc_embeddings.json'
 
 top_k = 5
@@ -32,49 +36,31 @@ if torch.cuda.is_available():
     logger.info('GPU is available.')
     device = "cuda"
 
+if DOCUMENTS_CACHE_FILE and os.path.isfile(DOCUMENTS_CACHE_FILE):
+    logger.info('Loading documents from cache')
 
-# TODO: Add the json strings as env variables
-json_dir = 'json_input'
-json_fname = 'excellent-articles_10.json'
+    with open(DOCUMENTS_CACHE_FILE, 'r') as f_in:
+        documents = json.load(f_in)
 
-json_fpath = os.path.join(json_dir, json_fname)
-
-if os.path.isfile(json_fpath):
-    logger.info(f'Loading data from {json_fpath}')
-    with open(json_fpath, 'r') as finn:
-        json_obj = json.load(finn)
-
-    if isinstance(json_obj, dict):
-        input_documents = [
-            Document(
-                content=content_,
-                meta={"src": url_}
-            )
-            for url_, content_ in tqdm(json_obj.items())
-        ]
-    elif isinstance(json_obj, list):
-        input_documents = [
-            Document(
-                content=obj_['content'],
-                meta={'src': obj_['meta']}
-            )
-            for obj_ in tqdm(json_obj)
-        ]
 else:
-    input_documents = [
-        Document(
-            content="My name is Asra, I live in Paris.",
-            meta={"src": "doc_1"}
-        ),
-        Document(
-            content="My name is Lee, I live in Berlin.",
-            meta={"src": "doc2"}
-        ),
-        Document(
-            content="My name is Giorgio, I live in Rome.",
-            meta={"src": "doc_3"}
-        ),
-    ]
+    logger.debug("fetch documents from wiki")
+    with open(DOCUMENTS_TOC, 'r') as tocFile:
+        toc = json.load(tocFile)
+        articles = fetch_articles(toc)
+        documents = {}
+        for wiki in articles:
+            documents.update(wiki['articles'])
+        if DOCUMENTS_CACHE_FILE:
+            with open(DOCUMENTS_CACHE_FILE, 'w') as f_out:
+                json.dump(documents, f_out)
+
+input_documents = [
+    Document(
+        content=content_,
+        meta={"src": url_}
+    )
+    for url_, content_ in tqdm(documents.items())
+]
 
 splitter = DocumentSplitter(
     split_by="sentence",

@@ -1,0 +1,30 @@
+[
+    {
+        "name": "German Wikipedia Policies",
+        "host": "https://de.wikipedia.org",
+        "api_path": "/w/api.php",
+        "lang": "de",
+        "login": false,
+        "titles" : [
+            "Wikipedia:Grundprinzipien",
+            "Wikipedia:Was_Wikipedia_nicht_ist",
+            "Wikipedia:Neutraler_Standpunkt",
+            "Wikipedia:Urheberrechte_beachten",
+            "Wikipedia:Wikiquette"
+        ]
+    },
+    {
+        "name": "English Wikipedia Policies",
+        "host": "https://en.wikipedia.org",
+        "api_path": "/w/api.php",
+        "lang": "en",
+        "login": false,
+        "titles" : [
+            "Wikipedia:Five_pillars",
+            "Wikipedia:What_Wikipedia_is_not",
+            "Wikipedia:Neutral_point_of_view",
+            "Wikipedia:Copyrights",
+            "Wikipedia:Civility"
+        ]
+    }
+]
