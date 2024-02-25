@@ -2,14 +2,13 @@ import os
 import json
 
 from tqdm import tqdm
+from pprint import pprint
 
-from haystack import Document  # , Pipeline
-from haystack.components.embedders import SentenceTransformersDocumentEmbedder
-from haystack.document_stores.in_memory import InMemoryDocumentStore
-from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
-from haystack.document_stores.types.policy import DuplicatePolicy
-from haystack.components.preprocessors import DocumentSplitter
-from haystack.components.preprocessors import DocumentCleaner
+from langchain.docstore.document import Document
+from langchain.text_splitter import CharacterTextSplitter
+from langchain_community.document_loaders import JSONLoader
+from langchain_community.embeddings.fake import FakeEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 import torch
 
@@ -35,104 +34,65 @@ if torch.cuda.is_available():
 
 # TODO: Add the json strings as env variables
 json_dir = 'json_input'
-json_fname = 'excellent-articles_10.json'
+json_fname = 'data.json'
 
 json_fpath = os.path.join(json_dir, json_fname)
 
-if os.path.isfile(json_fpath):
-    logger.info(f'Loading data from {json_fpath}')
-    with open(json_fpath, 'r') as finn:
-        json_obj = json.load(finn)
+def metadata_func(record: dict, metadata: dict) -> dict:
+    metadata["source"] = record.get("meta").get("source")
+    return metadata
 
-    if isinstance(json_obj, dict):
-        input_documents = [
-            Document(
-                content=content_,
-                meta={"src": url_}
-            )
-            for url_, content_ in tqdm(json_obj.items())
-        ]
-    elif isinstance(json_obj, list):
-        input_documents = [
-            Document(
-                content=obj_['content'],
-                meta={'src': obj_['meta']}
-            )
-            for obj_ in tqdm(json_obj)
-        ]
-else:
-    input_documents = [
-        Document(
-            content="My name is Asra, I live in Paris.",
-            meta={"src": "doc_1"}
-        ),
-        Document(
-            content="My name is Lee, I live in Berlin.",
-            meta={"src": "doc2"}
-        ),
-        Document(
-            content="My name is Giorgio, I live in Rome.",
-            meta={"src": "doc_3"}
-        ),
-    ]
-
-splitter = DocumentSplitter(
-    split_by="sentence",
-    split_length=5,
-    split_overlap=0
+# Create the JSONLoader instance
+loader = JSONLoader(
+    file_path=json_fpath,
+    jq_schema='.[]',
+    content_key="content",
+    metadata_func=metadata_func
 )
-input_documents = splitter.run(input_documents)['documents']
 
-cleaner = DocumentCleaner(
-    remove_empty_lines=True,
-    remove_extra_whitespaces=True,
-    remove_repeated_substrings=False
-)
-input_documents = cleaner.run(input_documents)['documents']
+documents = loader.load()
+pprint(documents[0])
 
-
-document_store = InMemoryDocumentStore(
-    embedding_similarity_function="cosine",
-    # embedding_dim=768,
-    # duplicate_documents="overwrite"
-)
+text_splitter = CharacterTextSplitter(chunk_size=250, chunk_overlap=0)
+docs = text_splitter.split_documents(documents)
 
 # https://huggingface.co/svalabs/german-gpl-adapted-covid
 sentence_transformer_model = 'svalabs/german-gpl-adapted-covid'
 logger.info(f'Sentence Transformer Name: {sentence_transformer_model}')
 
-embedder = SentenceTransformersDocumentEmbedder(
-    model=sentence_transformer_model,
-    device=device
+embeddings = HuggingFaceEmbeddings(
+    model_name=sentence_transformer_model,
+    model_kwargs={'device': device},
+    show_progress=True,
 )
-embedder.warm_up()
+
+from langchain_community.vectorstores.pgvecto_rs import PGVecto_rs
+
+import os
+
+PORT = os.getenv("DB_PORT", 5432)
+HOST = os.getenv("DB_HOST", "127.0.0.1")
+USER = os.getenv("DB_USER", "gbnc")
+PASS = os.getenv("DB_PASS", "")
+DB_NAME = os.getenv("DB_NAME", "gbnc")
 
 
-if EMBEDDING_CACHE_FILE and os.path.isfile(EMBEDDING_CACHE_FILE):
-    logger.info('Loading embeddings from cache')
+URL = "postgresql+psycopg://{username}:{password}@{host}:{port}/{db_name}".format(
+    port=PORT,
+    host=HOST,
+    username=USER,
+    password=PASS,
+    db_name=DB_NAME,
+)
 
-    with open(EMBEDDING_CACHE_FILE, 'r') as f_in:
-        documents_dict = json.load(f_in)
-        document_store.write_documents(
-            documents=[Document.from_dict(d_) for d_ in documents_dict],
-            policy=DuplicatePolicy.OVERWRITE
-        )
 
-else:
-    logger.debug("Generating embeddings")
+logger.info(f"Inserting {len(docs)} documents")
 
-    embedded = embedder.run(input_documents)
-    document_store.write_documents(
-        documents=embedded['documents'],
-        policy=DuplicatePolicy.OVERWRITE
-    )
+db = PGVecto_rs.from_documents(
+    documents=docs,
+    embedding=embeddings,
+    db_url=URL,
+    collection_name="gbnc",
+)
 
-    if EMBEDDING_CACHE_FILE:
-        with open(EMBEDDING_CACHE_FILE, 'w') as f_out:
-            documents_dict = [
-                Document.to_dict(d_)
-                for d_ in embedded['documents']
-            ]
-            json.dump(documents_dict, f_out)
-
-retriever = InMemoryEmbeddingRetriever(document_store=document_store)
+logger.info('done')

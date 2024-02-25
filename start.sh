@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 if [[ $PUBLIC_KEY ]]
 then
@@ -15,6 +16,32 @@ else
     echo "No public key provided, skipping ssh setup"
 fi
 
+
+echo "Setting up postgres database server with vecto.rs extension"
+
+service postgresql start
+
+su postgres <<'EOF'
+psql -c 'ALTER SYSTEM SET shared_preload_libraries = "vectors.so"'
+psql -c 'ALTER SYSTEM SET search_path TO "$user", public, vectors'
+EOF
+
+service postgresql restart
+
+DB_USER=postgres
+DB_PASS=$(openssl rand -base64 32)
+DB_NAME=gbnc
+export DB_USER
+export DB_PASS
+export DB_NAME
+
+su --preserve-environment postgres <<'EOF'
+psql -c "CREATE EXTENSION vectors;"
+psql -c "ALTER USER $DB_USER WITH PASSWORD '$DB_PASS';"
+psql -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;"
+EOF
+
+
 echo "Starting ollama"
 ollama serve &
 
@@ -26,6 +53,10 @@ echo "Pulling $OLLAMA_MODEL_NAME from ollama library"
 ollama pull "$OLLAMA_MODEL_NAME"
 
 cd /workspace
+
+echo "Preparing data"
+cat json_input/excellent-articles_10.json | jq 'to_entries | map({content: .value, meta: {source: .key}})' > json_input/data.json
+
 
 echo "Starting api"
 uvicorn gswikichat:app --reload --host 0.0.0.0 --port 8000 &

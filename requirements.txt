@@ -45,3 +45,9 @@ uvicorn==0.27.0
 uvloop==0.19.0
 watchfiles==0.21.0
 websockets==12.0
+pgvecto-rs==0.1.4
+langchain==0.1.9
+langchain-community==0.0.24
+langchain-core==0.1.26
+jq==1.6.0
+psycopg==3.1.18

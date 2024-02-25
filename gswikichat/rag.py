@@ -6,7 +6,7 @@ from haystack.dataclasses import ChatMessage
 from .llm_config import llm
 from .logger import get_logger
 from .prompt import user_prompt_builders, system_prompts
-from .vector_store_interface import embedder, retriever, input_documents
+from .vector_store_interface import db
 
 # Create logger instance from base logger config in `logger.py`
 logger = get_logger(__name__)
@@ -14,28 +14,23 @@ logger = get_logger(__name__)
 
 def rag_pipeline(query: str, top_k: int = 3, lang: str = 'de'):
 
-    query_document = Document(content=query)
-    query_embedded = embedder.run([query_document])
-    query_embedding = query_embedded['documents'][0].embedding
+    docs_with_score = db.similarity_search_with_score(query, top_k)
 
-    retriever_results = retriever.run(
-        query_embedding=list(query_embedding),
-        filters=None,
-        top_k=top_k,
-        scale_score=None,
-        return_embedding=None
-    )
+    for doc, score in docs_with_score:
+        print("-" * 80)
+        print("Score: ", score)
+        print(doc.page_content)
+        print("-" * 80)
 
-    logger.debug('retriever results:')
-    for retriever_result_ in retriever_results:
-        logger.debug(retriever_result_)
+    # langchain doc to haystack doc
+    docs = [Document.from_dict({"content":d.page_content,"meta":d.metadata}) for d,_ in docs_with_score]
 
     system_prompt = system_prompts[lang]
     user_prompt_builder = user_prompt_builders[lang]
 
     user_prompt_build = user_prompt_builder.run(
-        question=query_document.content,
-        documents=retriever_results['documents']
+        question=query,
+        documents=docs
     )
 
     prompt = user_prompt_build['prompt']
