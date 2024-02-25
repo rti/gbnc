@@ -45,7 +45,7 @@ async def api(query, top_k=3, lang='en'):
 
     sources = [
         {
-            "src": d_.meta['src'],
+            "src": d_.meta['source'],
             "content": d_.content,
             "score": d_.score
         } for d_ in answer.documents

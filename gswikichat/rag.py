@@ -51,10 +51,10 @@ def rag_pipeline(query: str, top_k: int = 3, lang: str = 'de'):
 
     answer_builder = AnswerBuilder()
     answer_build = answer_builder.run(
-        query=query_document.content,
+        query=query,
         replies=response['replies'],
         meta=[r.meta for r in response['replies']],
-        documents=retriever_results['documents'],
+        documents=docs,
         pattern=None,
         reference_pattern=None
     )
