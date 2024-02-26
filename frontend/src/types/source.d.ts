@@ -1,6 +1,6 @@
 export type Source = {
   id: number
-  src: string
+  source: string
   content: string
   score: number
 }

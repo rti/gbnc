@@ -28,12 +28,18 @@ EOF
 
 service postgresql restart
 
+cat > ~/.env <<EOF
 DB_USER=postgres
 DB_PASS=$(openssl rand -base64 32)
 DB_NAME=gbnc
 export DB_USER
 export DB_PASS
 export DB_NAME
+EOF
+
+source ~/.env
+
+echo "source ~/.env" >> ~/.bashrc
 
 su --preserve-environment postgres <<'EOF'
 psql -c "CREATE EXTENSION vectors;"
@@ -53,10 +59,6 @@ echo "Pulling $OLLAMA_MODEL_NAME from ollama library"
 ollama pull "$OLLAMA_MODEL_NAME"
 
 cd /workspace
-
-echo "Preparing data"
-cat json_input/excellent-articles_10.json | jq 'to_entries | map({content: .value, meta: {source: .key}})' > json_input/data.json
-
 
 echo "Starting api"
 uvicorn gswikichat:app --reload --host 0.0.0.0 --port 8000 &
