@@ -20,7 +20,7 @@ const i18n = createI18n({
     de: {
       'chat-prompt': 'Schreib ChatGSWiki...',
       'check-linked-wiki-pages-notice':
-        'Zusammenfassungen wurden durch ein großes Sprachmodell erstellt, das Informationen falsch interpretieren, falsch darstellen oder vollständig fabrizieren kann. Bitte überprüfen Sie die verlinkten Quelle(n), um sicherzustellen, dass die bereitgestellten Informationen korrekt sind.',
+        'Zusammenfassungen wurden durch ein großes Sprachmodell erstellt, das Informationen falsch interpretieren, falsch darstellen oder vollständig erfinden kann. Bitte überprüfen Sie die verlinkten Quelle(n), um sicherzustellen, dass die bereitgestellten Informationen korrekt sind.',
       'no-response-message':
         'Leider wurde auf Ihre Frage keine gültige Antwort zurückgegeben. Bitte versuchen Sie es umzuformulieren.',
       source: 'Quelle'
