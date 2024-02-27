@@ -15,7 +15,8 @@ const i18n = createI18n({
         'Please check the linked source(s) to make sure that the information provided is correct.',
       'no-response-message':
         'Sorry, but no valid response was returned for your question. Please try rephrasing it.',
-      source: 'Source'
+      source: 'Source',
+      'enter-api-secret': "Enter your API secret"
     },
     de: {
       'chat-prompt': 'Schreib ChatGSWiki...',
@@ -23,7 +24,8 @@ const i18n = createI18n({
         'Bitte überprüfen Sie die verlinkten Quelle(n), um sicherzustellen, dass die bereitgestellten Informationen korrekt sind.',
       'no-response-message':
         'Leider wurde auf Ihre Frage keine gültige Antwort zurückgegeben. Bitte versuchen Sie es umzuformulieren.',
-      source: 'Quelle'
+      source: 'Quelle',
+      'enter-api-secret': "API Passwort eingeben"
     }
   }
 })
