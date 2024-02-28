@@ -10,14 +10,14 @@ OLLAMA_MODEL_NAME = os.environ.get("OLLAMA_MODEL_NAME")
 OLLAMA_URL = os.environ.get("OLLAMA_URL")
 OLLAMA_CHAT_URL = f"{OLLAMA_URL}/api/chat"
 
-logger.info(f'Using {OLLAMA_MODEL_NAME=}')
-logger.info(f'Endpoint: {OLLAMA_URL=}')
-logger.info(f'Generate: {OLLAMA_CHAT_URL=}')
+def get_llm():
+    logger.info(f'Using {OLLAMA_MODEL_NAME=}')
+    logger.info(f'Endpoint: {OLLAMA_URL=}')
+    logger.info(f'Generate: {OLLAMA_CHAT_URL=}')
+    logger.info(f"Setting up ollama with {OLLAMA_MODEL_NAME}")
 
-logger.info(f"Setting up ollama with {OLLAMA_MODEL_NAME}")
-
-llm = OllamaChatGenerator(
-    model=OLLAMA_MODEL_NAME,
-    url=OLLAMA_CHAT_URL,
-    timeout=120
-)
+    return OllamaChatGenerator(
+        model=OLLAMA_MODEL_NAME,
+        url=OLLAMA_CHAT_URL,
+        timeout=120
+    )

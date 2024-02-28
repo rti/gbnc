@@ -17,8 +17,8 @@
               class="text-sm cursor-pointer text-light-distinct-text dark:text-dark-distinct-text"
             >
               <summary>
-                {{ $t('source') }} ({{ s.score.toFixed(1) }}/5):
-                <a class="link-text" :href="s.src">{{ s.src }}</a>
+                {{ $t('source') }} ({{ s.score.toFixed(1) }}):
+                <a class="link-text" :href="s.source">{{ s.source }}</a>
               </summary>
               <p class="pt-2 pl-4">{{ s.content }}</p>
             </details>

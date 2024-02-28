@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 function generate_random_string() { 
     length=32
@@ -26,6 +27,38 @@ then
 else
     echo "No public key provided, skipping ssh setup"
 fi
+
+
+echo "Setting up postgres database server with vecto.rs extension"
+
+service postgresql start
+
+su postgres <<'EOF'
+psql -c 'ALTER SYSTEM SET shared_preload_libraries = "vectors.so"'
+psql -c 'ALTER SYSTEM SET search_path TO "$user", public, vectors'
+EOF
+
+service postgresql restart
+
+cat > ~/.env <<EOF
+DB_USER=postgres
+DB_PASS=$(openssl rand -base64 32)
+DB_NAME=gbnc
+export DB_USER
+export DB_PASS
+export DB_NAME
+EOF
+
+source ~/.env
+
+echo "source ~/.env" >> ~/.bashrc
+
+su --preserve-environment postgres <<'EOF'
+psql -c "CREATE EXTENSION vectors;"
+psql -c "ALTER USER $DB_USER WITH PASSWORD '$DB_PASS';"
+psql -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;"
+EOF
+
 
 echo "Starting ollama"
 ollama serve &

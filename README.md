@@ -10,9 +10,7 @@ To build and run the container locally with hot reload on python files do:
 ```
 DOCKER_BUILDKIT=1 docker build . -t gbnc
 docker run  \
-  --env HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN \
   --volume "$(pwd)/gswikichat":/workspace/gswikichat \
-  --volume gbnc_cache:/root/.cache \
   --publish 8000:8000 \
   --rm \
   --interactive \
@@ -21,6 +19,21 @@ docker run  \
   gbnc
 ```
 Point your browser to http://localhost:8000/ and use the frontend.
+
+To fetch data from a `toc.json` wiki fetching definition, run:
+```
+$ docker exec -it gbnc bash
+# export WIKI_USER=<wikibotusername>
+# export WIKI_PW=<yoursecretbotuserpassword>
+# python3 -m gswikichat.fetch_articles toc.json > articles.json
+```
+
+To import data run:
+```
+$ docker exec -it gbnc bash
+# cat json_input/excellent-articles_10.json | jq 'to_entries | map({content: .value, meta: {source: .key}})' > import.json
+# python3 -m gswikichat.db import.json
+```
 
 ### Runpod.io
 
