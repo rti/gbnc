@@ -6,8 +6,11 @@ import configparser
 
 from bs4 import BeautifulSoup
 
-GSWIKI_USER = os.environ.get('GSWIKI_USER')
-GSWIKI_PW = os.environ.get('GSWIKI_PW')
+from .logger import get_logger
+logger = get_logger(__name__)
+
+WIKI_USER = os.environ.get('WIKI_USER')
+WIKI_PW = os.environ.get('WIKI_PW')
 
 HTML_FILTERS  = {
     'div': ['navbox','navbox-styles','spoken-wikipedia', 'noprint', 'hatnote', 'rt-tooltip', 'reflist'],
@@ -46,7 +49,7 @@ def fetchFromWiki(url, titles, loginRequired):
     articles = {}
     for title in titles:
         sections = fetchSections(url, title, session.cookies)
-        print("fetching {} sections for article {}".format(len(sections), title))
+        print("fetching {} sections for article {}".format(len(sections), title), file=sys.stderr)
         for section in [ { 'index' : 0, 'line': 'Intro', 'linkAnchor' : '', 'anchor' : '' } ] + sections :
             if section['index'] == '' or section['line'] in SECTION_FILTERS:
                 continue
@@ -85,8 +88,8 @@ def loginToWiki(url):
     tokenQuery = { 'action': 'query', 'meta': 'tokens', 'type': 'login', 'format': 'json' }
     token = session.get(url, params=tokenQuery).json()['query']['tokens']['logintoken']
     loginData = {
-        'lgname': GSWIKI_USER,
-        'lgpassword': GSWIKI_PW,
+        'lgname': WIKI_USER,
+        'lgpassword': WIKI_PW,
         'lgtoken': token,
         'action': 'login',
         'format': 'json'
@@ -107,5 +110,57 @@ def fetch_articles(toc):
             'lang': wiki['lang'],
             'articles': wikiArticles
             } )
+
     return articles
 
+def transform_articles(articles):
+    output = {}
+    for wiki in articles:
+        url = wiki.get("url") + "/wiki/"
+        articles = wiki.get("articles")
+        for name, content in articles.items():
+            output[url+name] = content
+    return output
+
+if __name__ == "__main__":
+    import sys
+    import json
+
+    if len(sys.argv) > 1:
+        file = sys.argv[1]
+        with open(file) as f:
+            data = json.load(f)
+
+        articles = fetch_articles(data)
+        print(json.dumps(transform_articles(articles), indent=4))
+
+    else:
+        logger.error(
+            """Provide JSON file with the following structure as first parameter
+    [
+        {
+            "name": "Name of the wiki",
+            "host": "https://somewiki.org",
+            "api_path": "/w/api.php",
+            "lang": "en",
+            "login": false,
+            "titles" : [
+                "Namespace:Page1",
+                "Namespace:Page2"
+            ]
+        },
+        {
+            "name": "Name of the another wiki",
+            "host": "https://someotherwiki.org",
+            "api_path": "/w/api.php",
+            "lang": "de",
+            "login": false,
+            "titles" : [
+                "Namespace:SeiteEins",
+                "Namespace:SeiteZwei"
+            ]
+        }
+    ]
+            """
+        )
+        sys.exit(1)

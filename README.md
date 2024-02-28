@@ -25,8 +25,15 @@ docker run  \
 ```
 Point your browser to http://localhost:8000/ and use the frontend.
 
-To import data run:
+To fetch data from a `toc.json` wiki fetching definition, run:
+```
+$ docker exec -it gbnc bash
+# export WIKI_USER=wikibotusername
+# export WIKI_PW=yoursecretbotuserpassword
+# python -m gswikichat.fetch_articles toc.json > articles.json
+```
 
+To import data run:
 ```
 $ docker exec -it gbnc bash
 # cat json_input/excellent-articles_10.json | jq 'to_entries | map({content: .value, meta: {source: .key}})' > import.json
