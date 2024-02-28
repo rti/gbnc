@@ -4,7 +4,7 @@ from haystack.components.builders.answer_builder import AnswerBuilder
 from haystack.dataclasses import ChatMessage
 
 from .db import get_db
-from .llm_config import llm
+from .llm_config import get_llm
 from .logger import get_logger
 from .prompt import user_prompt_builders, system_prompts
 
@@ -49,7 +49,7 @@ def rag_pipeline(query: str, top_k: int, lang: str):
         ChatMessage.from_user(prompt),
     ]
 
-    response = llm.run(
+    response = get_llm().run(
         messages,
         # generation_kwargs={"temperature": 0.2}
     )
