@@ -25,7 +25,7 @@ To fetch data from a `toc.json` wiki fetching definition, run:
 $ docker exec -it gbnc bash
 # export WIKI_USER=<wikibotusername>
 # export WIKI_PW=<yoursecretbotuserpassword>
-# python -m gswikichat.fetch_articles toc.json > articles.json
+# python3 -m gswikichat.fetch_articles toc.json > articles.json
 ```
 
 To import data run:
