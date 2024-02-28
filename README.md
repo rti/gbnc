@@ -10,6 +10,9 @@ To build and run the container locally with hot reload on python files do:
 ```
 DOCKER_BUILDKIT=1 docker build . -t gbnc
 docker run  \
+  --env DOCUMENTS_TOC=json_input/gs-wiki.json \
+  --env GSWIKI_USER=<bot_username> \
+  --env GSWIKI_PW=<bot_password> \
   --env HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN \
   --volume "$(pwd)/gswikichat":/workspace/gswikichat \
   --volume gbnc_cache:/root/.cache \
