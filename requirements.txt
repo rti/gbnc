@@ -51,3 +51,5 @@ langchain-community==0.0.24
 langchain-core==0.1.26
 jq==1.6.0
 psycopg==3.1.18
+beautifulsoup4==4.12.3
+lxml==5.1.0
