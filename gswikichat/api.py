@@ -1,6 +1,10 @@
+import os
+
+from typing import Annotated
+
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI
+from fastapi import FastAPI, Header
 
 from .logger import get_logger
 from .rag import rag_pipeline
@@ -9,6 +13,7 @@ from .rag import rag_pipeline
 logger = get_logger(__name__)
 
 FRONTEND_STATIC_DIR = "./frontend/dist"
+API_SECRET = os.environ.get("API_SECRET")
 
 app = FastAPI()
 
@@ -30,7 +35,10 @@ async def favicon():
 
 
 @app.get("/api")
-async def api(query, top_k=3, lang="en"):
+async def api(x_api_secret: Annotated[str, Header()], query, top_k=3, lang='en'):
+    if not API_SECRET == x_api_secret:
+        raise Exception("API key is missing or incorrect") 
+
     if not lang in ["en", "de"]:
         raise Exception("language must be 'en' or 'de'")
 

@@ -3,6 +3,18 @@
 set -e
 set -x
 
+function generate_random_string() { 
+    length=32
+    random_string=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c ${length})
+    echo "${random_string}"
+}
+
+if [ -z "$API_SECRET" ]; then
+    API_SECRET="$(generate_random_string)"
+    echo "API_SECRET set to ${API_SECRET}"
+    export API_SECRET
+fi
+
 if [[ $PUBLIC_KEY ]]
 then
     mkdir -p ~/.ssh
